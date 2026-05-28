@@ -2043,9 +2043,7 @@ export default function App() {
               }} className="text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-indigo-600 transition-colors">{t.helpCenter}</button>
             </nav>
 
-            {!isAuthenticated && (
-              <button onClick={toggleTheme} className="p-2 text-slate-500 hover:text-indigo-600 transition-colors">{theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}</button>
-            )}
+            <button onClick={toggleTheme} className="p-2 text-slate-500 hover:text-indigo-600 transition-colors">{theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}</button>
 
             {isAuthenticated ? (
               <div className="hidden sm:flex items-center gap-3 ml-2 border-l border-slate-200 dark:border-slate-800 pl-6">
@@ -2059,11 +2057,12 @@ export default function App() {
                 }} className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black hover:scale-105 transition-transform overflow-hidden">
                    {profilePicUrl ? <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" /> : profileName ? profileName.substring(0, 2).toUpperCase() : 'U'}
                 </button>
+                <button onClick={handleSignOut} className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 ml-4 hover:text-red-600 dark:hover:text-red-400 transition-colors"><LogOut className="w-4 h-4" /> {t.signOut}</button>
               </div>
-            ) : view === 'landing' ? (
-              <button onClick={() => { setView('auth'); setAuthMode('login'); }} className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-700 transition-all active:scale-95">{t.logIn}</button>
             ) : (
-              <button onClick={handleSignOut} className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2"><LogOut className="w-4 h-4" /> {t.signOut}</button>
+              view !== 'auth' && (
+                <button onClick={() => { setView('auth'); setAuthMode('login'); }} className="bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-700 transition-all active:scale-95">{t.logIn}</button>
+              )
             )}
             <button className="lg:hidden p-2 text-slate-600 dark:text-slate-400" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>{isMobileMenuOpen ? <X /> : <Menu />}</button>
           </div>
@@ -2072,48 +2071,80 @@ export default function App() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="lg:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-8 py-6 flex flex-col gap-4 overflow-hidden">
-            {view !== 'landing' && view !== 'auth' && (
+            
+            {/* User Profile Header (Mobile Menu) */}
+            {isAuthenticated && (
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black overflow-hidden shadow-sm">
+                  {profilePicUrl ? <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" /> : profileName ? profileName.substring(0, 2).toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-800 dark:text-white leading-tight">{profileName || 'User'}</h4>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{role === 'organizer' ? t.organizerMode : t.audienceMode}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Mode Switcher */}
+            {isAuthenticated && (
               <button 
-                onClick={toggleRole}
-                className="w-full flex justify-center items-center gap-2 px-3 py-3 border-2 border-indigo-100 dark:border-slate-800 bg-indigo-50 dark:bg-slate-800 rounded-xl text-sm font-black text-indigo-700 dark:text-indigo-400"
+                onClick={() => { toggleRole(); setIsMobileMenuOpen(false); }}
+                className="w-full flex justify-center items-center gap-2 px-3 py-2.5 border border-indigo-100 dark:border-slate-800 bg-indigo-50/50 dark:bg-slate-800 rounded-xl text-xs font-black text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 transition-colors"
               >
                 <ArrowLeftRight className="w-4 h-4" />
-                {role === 'organizer' ? t.organizerMode : t.audienceMode}
+                {role === 'organizer' ? 'Switch to Audience Mode' : 'Switch to Organizer Mode'}
               </button>
             )}
-            {view === 'dashboard' && role === 'organizer' ? (
-              <div className="flex flex-col gap-4 mt-2">
-                <button onClick={() => { switchOrganizerTab('dashboard'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.dashboard}</button>
-                <button onClick={() => { switchOrganizerTab('aiEventCoPilot'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'aiEventCoPilot' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.aiEventCoPilot}</button>
-                <button onClick={() => { switchOrganizerTab('myPublishedEvents'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'myPublishedEvents' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.myPublishedEvents}</button>
-                <button onClick={() => { switchOrganizerTab('attendeesLogistics'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'attendeesLogistics' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.attendeesLogistics}</button>
-                <button onClick={() => { switchOrganizerTab('communityImpact'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'communityImpact' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.communityImpact}</button>
-                <button onClick={() => { switchOrganizerTab('finance'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'finance' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.finance}</button>
-                <button onClick={() => { switchOrganizerTab('settings'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'settings' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.settings}</button>
-                <button onClick={() => { setShowCreateForm(false); setView('create-event'); setIsMobileMenuOpen(false); clearCopilotState(); }} className="text-left font-bold text-sm text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg">{t.createEvent}</button>
-              </div>
-            ) : view === 'dashboard' && role === 'audience' ? (
-              <div className="flex flex-col gap-4 mt-2">
-                <button onClick={() => { setAudienceTab('myTickets'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${audienceTab === 'myTickets' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.myTickets}</button>
-                <button onClick={() => { setShowSavedEventModal(true); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm text-slate-600 dark:text-slate-400`}>{t.savedEvents}</button>
-                <button onClick={() => { setShowInterestModal(true); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm text-slate-600 dark:text-slate-400`}>{t.interestPreferences}</button>
-                <button onClick={() => { setAudienceTab('accountPayment'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${audienceTab === 'accountPayment' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.accountPayment}</button>
-              </div>
+
+            {/* Navigation options depending on current view */}
+            {view === 'dashboard' ? (
+              // If on dashboard, show active role controls
+              role === 'organizer' ? (
+                <div className="flex flex-col gap-4 mt-2">
+                  <button onClick={() => { switchOrganizerTab('dashboard'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.dashboard}</button>
+                  <button onClick={() => { switchOrganizerTab('aiEventCoPilot'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'aiEventCoPilot' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.aiEventCoPilot}</button>
+                  <button onClick={() => { switchOrganizerTab('myPublishedEvents'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'myPublishedEvents' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.myPublishedEvents}</button>
+                  <button onClick={() => { switchOrganizerTab('attendeesLogistics'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'attendeesLogistics' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.attendeesLogistics}</button>
+                  <button onClick={() => { switchOrganizerTab('communityImpact'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'communityImpact' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.communityImpact}</button>
+                  <button onClick={() => { switchOrganizerTab('finance'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'finance' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.finance}</button>
+                  <button onClick={() => { switchOrganizerTab('settings'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'settings' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.settings}</button>
+                  <button onClick={() => { setShowCreateForm(false); setView('create-event'); setIsMobileMenuOpen(false); clearCopilotState(); }} className="text-left font-bold text-sm text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg">{t.createEvent}</button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 mt-2">
+                  <button onClick={() => { setAudienceTab('myTickets'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${audienceTab === 'myTickets' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.myTickets}</button>
+                  <button onClick={() => { setShowSavedEventModal(true); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm text-slate-600 dark:text-slate-400`}>{t.savedEvents}</button>
+                  <button onClick={() => { setShowInterestModal(true); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm text-slate-600 dark:text-slate-400`}>{t.interestPreferences}</button>
+                  <button onClick={() => { setAudienceTab('accountPayment'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${audienceTab === 'accountPayment' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.accountPayment}</button>
+                </div>
+              )
             ) : (
-              <>
-                <button onClick={() => { 
-                   if (role !== 'organizer') setRole('organizer');
-                   if (!isAuthenticated) {
-                     setToast({ message: "To start creating events and using AI Drafter, please create an account first!", show: true });
+              // If not on dashboard view
+              <div className="flex flex-col gap-4 mt-2">
+                {isAuthenticated ? (
+                  <>
+                    <button 
+                      onClick={() => { setView('dashboard'); setIsMobileMenuOpen(false); }} 
+                      className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm text-center shadow-lg shadow-indigo-100 dark:shadow-none transition-all active:scale-95"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      {t.dashboard}
+                    </button>
+                    {role === 'organizer' && (
+                      <button onClick={() => { setShowCreateForm(false); setView('create-event'); setIsMobileMenuOpen(false); clearCopilotState(); }} className="text-left font-bold text-sm text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg">{t.createEvent}</button>
+                    )}
+                  </>
+                ) : (
+                  <button onClick={() => { 
+                     if (role !== 'organizer') setRole('organizer');
+                     setToast({ message: "To start creating events and using AI Drafter, please sign in first!", show: true });
                      setTimeout(() => setToast({ message: '', show: false }), 4000);
                      setView('auth');
-                   } else {
-                     setShowCreateForm(false);
-                     setView('create-event'); 
-                   }
-                   setIsMobileMenuOpen(false);
-                }} className="text-left font-bold text-sm text-slate-600 dark:text-slate-400">{t.createEvent}</button>
-              </>
+                     setAuthMode('login');
+                     setIsMobileMenuOpen(false);
+                  }} className="text-left font-bold text-sm text-slate-600 dark:text-slate-400">{t.createEvent}</button>
+                )}
+              </div>
             )}
             
             <hr className="border-slate-50 dark:border-slate-800" />
@@ -2128,11 +2159,11 @@ export default function App() {
               {t.helpCenter}
             </button>
             
-            {!isAuthenticated && view === 'landing' && (
+            {!isAuthenticated && view !== 'auth' && (
               <button onClick={() => { setView('auth'); setAuthMode('login'); setIsMobileMenuOpen(false); }} className="bg-indigo-600 text-white p-3 rounded-xl font-bold text-center">{t.logIn}</button>
             )}
-            {isAuthenticated && view === 'dashboard' && (
-               <button onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} className="text-left font-bold text-sm text-red-500">{t.signOut}</button>
+            {isAuthenticated && (
+               <button onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} className="text-left font-bold text-sm text-red-500 flex items-center gap-2"><LogOut className="w-4 h-4" /> {t.signOut}</button>
             )}
           </motion.div>
         )}
