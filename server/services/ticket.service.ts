@@ -138,7 +138,7 @@ export class TicketService {
           }
 
           transporter = nodemailer.createTransport({
-            host: resolvedHost,
+            host: smtpHost,
             port: smtpPort,
             secure: smtpPort === 465,
             auth: {
