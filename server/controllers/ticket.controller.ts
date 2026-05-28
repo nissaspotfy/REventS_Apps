@@ -212,9 +212,19 @@ export class TicketController {
         </html>
       `;
 
-      const options = { format: 'A4' };
+      const options = { 
+        format: 'A4',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      };
       const file = { content: htmlContent };
-      const pdfBuffer = await html_to_pdf.generatePdf(file, options);
+      
+      // Set a 15-second timeout for PDF generation
+      const pdfPromise = html_to_pdf.generatePdf(file, options);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Invoice PDF generation timed out')), 15000)
+      );
+      
+      const pdfBuffer = await Promise.race([pdfPromise, timeoutPromise]) as Buffer;
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename=Invoice_${transactionId}.pdf`);

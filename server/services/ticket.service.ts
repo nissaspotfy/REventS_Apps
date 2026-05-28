@@ -381,9 +381,19 @@ REventS Team
         // Generate PDF Buffer for this specific ticket
         let pdfBuffer: Buffer | null = null;
         try {
-          const options = { format: 'A4' };
+          const options = { 
+            format: 'A4',
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+          };
           const file = { content: htmlPdfContent };
-          pdfBuffer = await html_to_pdf.generatePdf(file, options);
+          
+          // Set a 15-second timeout for PDF generation to prevent hanging SMTP delivery
+          const pdfPromise = html_to_pdf.generatePdf(file, options);
+          const timeoutPromise = new Promise<null>((_, reject) => 
+            setTimeout(() => reject(new Error('PDF generation timed out')), 15000)
+          );
+          
+          pdfBuffer = await Promise.race([pdfPromise, timeoutPromise]) as Buffer;
         } catch (pdfErr) {
           console.error(`Failed to generate PDF for ticket ${tCode}:`, pdfErr);
         }
