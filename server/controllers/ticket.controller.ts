@@ -1,0 +1,226 @@
+import { Request, Response } from 'express';
+import { TicketService } from '../services/ticket.service';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
+import html_to_pdf from 'html-pdf-node';
+
+export class TicketController {
+  static async purchaseTicket(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId; // Can be undefined for guests
+
+      const { eventId, paymentMethod, fullName, email, audienceCategory, referralSource, quantity } = req.body;
+      if (!eventId || !paymentMethod) {
+        res.status(400).json({ error: 'eventId and paymentMethod are required.' });
+        return;
+      }
+
+      const result = await TicketService.purchaseTicket(
+        userId,
+        eventId,
+        paymentMethod,
+        fullName,
+        email,
+        audienceCategory,
+        referralSource,
+        quantity ? parseInt(quantity, 10) : 1
+      );
+      res.status(201).json(result);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  static async getUserTickets(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized.' });
+        return;
+      }
+
+      const tickets = await TicketService.getUserTickets(userId);
+      res.status(200).json(tickets);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getOrganizerTickets(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized.' });
+        return;
+      }
+
+      const { User } = await import('../models/User');
+      const user = await User.findByPk(userId);
+      const ownerId = user?.preferences?.joinedTeamOf || userId;
+
+      const tickets = await TicketService.getOrganizerTickets(ownerId);
+      res.status(200).json(tickets);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async checkInTicket(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized.' });
+        return;
+      }
+
+      const { User } = await import('../models/User');
+      const user = await User.findByPk(userId);
+      const organizerId = user?.preferences?.joinedTeamOf || userId;
+
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        res.status(400).json({ error: 'Invalid ticket ID.' });
+        return;
+      }
+
+      const result = await TicketService.checkInTicket(id, organizerId);
+      res.status(200).json(result);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  static async checkInTicketByQr(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized.' });
+        return;
+      }
+
+      const { User } = await import('../models/User');
+      const user = await User.findByPk(userId);
+      const organizerId = user?.preferences?.joinedTeamOf || userId;
+
+      const { qrCode, eventId } = req.body;
+      if (!qrCode || !eventId) {
+        res.status(400).json({ error: 'qrCode and eventId are required.' });
+        return;
+      }
+
+      const result = await TicketService.checkInTicketByQr(qrCode, parseInt(eventId, 10), organizerId);
+      res.status(200).json(result);
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  static async checkDuplicateTicket(req: AuthenticatedRequest, res: Response) {
+    try {
+      const userId = req.user?.userId;
+      const { eventId, email } = req.body;
+      if (!eventId) {
+        res.status(400).json({ error: 'eventId is required.' });
+        return;
+      }
+      const hasTicket = await TicketService.checkDuplicateTicket(
+        userId,
+        parseInt(eventId, 10),
+        email || ''
+      );
+      res.status(200).json({ hasTicket });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  static async downloadInvoice(req: Request, res: Response) {
+    try {
+      const { transactionId } = req.params;
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+            .invoice-box { max-width: 800px; margin: auto; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); font-size: 16px; line-height: 24px; color: #555; background: #fff; padding: 30px; border-radius: 12px; }
+            .invoice-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 20px; }
+            .logo { font-size: 28px; font-weight: bold; color: #6366f1; }
+            .title { font-size: 24px; color: #1e3a8a; font-weight: bold; margin: 0; }
+            .details-table { width: 100%; margin-bottom: 30px; border-collapse: collapse; }
+            .details-table td { padding: 8px 0; vertical-align: top; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            .items-table th { background: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 12px; text-align: left; font-weight: bold; color: #475569; }
+            .items-table td { border-bottom: 1px solid #e2e8f0; padding: 12px; color: #334155; }
+            .total-row td { font-weight: bold; font-size: 18px; color: #111827; border-top: 2px solid #e2e8f0; padding-top: 15px; }
+            .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #94a3b8; line-height: 18px; }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-box">
+            <div class="invoice-header">
+              <div class="logo">REventS</div>
+              <div class="title">INVOICE</div>
+            </div>
+            
+            <table class="details-table">
+              <tr>
+                <td>
+                  <strong>REventS Tickets Ltd.</strong><br>
+                  SCBD District, Tower 2A<br>
+                  Jakarta, Indonesia
+                </td>
+                <td style="text-align: right;">
+                  <strong>Invoice No:</strong> ${transactionId || 'TXN-192837'}<br>
+                  <strong>Date:</strong> November 25, 2025<br>
+                  <strong>Payment Status:</strong> <span style="color: #10b981; font-weight: bold;">PAID</span>
+                </td>
+              </tr>
+            </table>
+            
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Event Description</th>
+                  <th style="text-align: center; width: 10%;">Qty</th>
+                  <th style="text-align: right; width: 25%;">Unit Price</th>
+                  <th style="text-align: right; width: 25%;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Tech Summit 2024 (Standard Ticket)</td>
+                  <td style="text-align: center;">1</td>
+                  <td style="text-align: right;">IDR 250.000</td>
+                  <td style="text-align: right;">IDR 250.000</td>
+                </tr>
+                <tr class="total-row">
+                  <td colspan="2"></td>
+                  <td style="text-align: right;">Total Paid:</td>
+                  <td style="text-align: right; color: #6366f1;">IDR 250.000</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div class="footer">
+              Thank you for choosing REventS! We look forward to seeing you at the event.<br>
+              Need help? Contact support@revents.com
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const options = { format: 'A4' };
+      const file = { content: htmlContent };
+      const pdfBuffer = await html_to_pdf.generatePdf(file, options);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=Invoice_${transactionId}.pdf`);
+      res.send(pdfBuffer);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+}

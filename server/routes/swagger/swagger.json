@@ -1,0 +1,483 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "REventS API Documentation",
+    "version": "1.0.0",
+    "description": "API endpoints for the REventS (AI-driven Event Management Platform) backend service."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Development Server"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "fullName"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "user@example.com" },
+                  "password": { "type": "string", "example": "password123" },
+                  "fullName": { "type": "string", "example": "Jane Doe" },
+                  "role": { "type": "string", "enum": ["audience", "organizer"], "default": "audience" },
+                  "preferences": {
+                    "type": "object",
+                    "properties": {
+                      "categories": { "type": "array", "items": { "type": "string" }, "example": ["Music", "Tech"] },
+                      "budget": { "type": "string", "example": "100-300k" },
+                      "frequency": { "type": "string", "example": "Weekend" },
+                      "ageGroup": { "type": "string", "example": "Young Adult" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsIn..." }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or email already registered" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Authenticate user and get token",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "john@example.com" },
+                  "password": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsIn..." }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "summary": "Get authenticated user profile",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Profile details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "put": {
+        "summary": "Update authenticated user profile / preferences",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": { "type": "string", "example": "Johnathan Smith" },
+                  "profilePicUrl": { "type": "string", "nullable": true, "example": "https://example.com/avatar.jpg" },
+                  "preferences": {
+                    "type": "object",
+                    "properties": {
+                      "categories": { "type": "array", "items": { "type": "string" } },
+                      "budget": { "type": "string" },
+                      "frequency": { "type": "string" },
+                      "ageGroup": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/api/events": {
+      "get": {
+        "summary": "List events with optional filters",
+        "tags": ["Events"],
+        "parameters": [
+          { "name": "category", "in": "query", "schema": { "type": "string" }, "description": "Filter by event category, e.g. Music, Tech", "example": "Music" },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search by keyword in title/desc", "example": "festival" },
+          { "name": "location", "in": "query", "schema": { "type": "string" }, "description": "Filter by location", "example": "Jakarta" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Event" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new event",
+        "tags": ["Events"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "category", "date", "location", "price"],
+                "properties": {
+                  "title": { "type": "string", "example": "Vibrant Hackathon 2026" },
+                  "category": { "type": "string", "example": "Tech" },
+                  "date": { "type": "string", "example": "Saturday, August 15" },
+                  "location": { "type": "string", "example": "Grand Ballroom, Jakarta" },
+                  "price": { "type": "string", "example": "IDR 150.000" },
+                  "image": { "type": "string", "example": "https://images.unsplash.com/photo-1540575467063-178a50c2df87" },
+                  "isTrending": { "type": "boolean", "default": false },
+                  "description": { "type": "string", "example": "A fast-paced developer competition." },
+                  "type": { "type": "string", "enum": ["offline", "online"], "default": "offline" },
+                  "ticketType": { "type": "string", "enum": ["free", "paid"], "default": "paid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Event" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/api/events/{id}": {
+      "get": {
+        "summary": "Get event details by ID (increments views)",
+        "tags": ["Events"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Event" }
+              }
+            }
+          },
+          "404": { "description": "Event not found" }
+        }
+      },
+      "put": {
+        "summary": "Update an existing event",
+        "tags": ["Events"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "category": { "type": "string" },
+                  "date": { "type": "string" },
+                  "location": { "type": "string" },
+                  "price": { "type": "string" },
+                  "image": { "type": "string" },
+                  "description": { "type": "string" },
+                  "type": { "type": "string" },
+                  "ticketType": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Event" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or unauthorized update" }
+        }
+      },
+      "delete": {
+        "summary": "Delete an event",
+        "tags": ["Events"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Unauthorized or event not found" }
+        }
+      }
+    },
+    "/api/tickets/purchase": {
+      "post": {
+        "summary": "Purchase a ticket for an event",
+        "tags": ["Tickets"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["eventId", "paymentMethod"],
+                "properties": {
+                  "eventId": { "type": "integer", "example": 1 },
+                  "paymentMethod": { "type": "string", "enum": ["qris", "bca", "mandiri", "bni"], "example": "qris" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ticket purchased successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticket": { "$ref": "#/components/schemas/Ticket" },
+                    "event": { "$ref": "#/components/schemas/Event" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid request or validation failed" }
+        }
+      }
+    },
+    "/api/tickets/user": {
+      "get": {
+        "summary": "Get all tickets for the authenticated user",
+        "tags": ["Tickets"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User's list of tickets with embedded event details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      { "$ref": "#/components/schemas/Ticket" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "event": { "$ref": "#/components/schemas/Event" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/api/copilot/generate": {
+      "post": {
+        "summary": "Generate an event proposal draft using AI",
+        "tags": ["AI Co-Pilot"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": { "type": "string", "example": "A 2-day tech meetup in Jakarta focusing on web3 developers." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI-generated event proposal details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "title": { "type": "string", "example": "Web3 Builders Summit Jakarta" },
+                    "category": { "type": "string", "example": "Tech" },
+                    "description": { "type": "string", "example": "Connect, build, and deploy the next generation of decentralized web protocols." },
+                    "fullDescription": { "type": "string", "example": "### Concept\nThis event is designed for web3 developers... \n\n### Agenda\n- Day 1: Keynote & Panels..." }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Prompt is missing or invalid" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "email": { "type": "string", "example": "user@example.com" },
+          "fullName": { "type": "string", "example": "Jane Doe" },
+          "role": { "type": "string", "example": "audience" },
+          "profilePicUrl": { "type": "string", "nullable": true },
+          "preferences": {
+            "type": "object",
+            "properties": {
+              "categories": { "type": "array", "items": { "type": "string" } },
+              "budget": { "type": "string" },
+              "frequency": { "type": "string" },
+              "ageGroup": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "title": { "type": "string", "example": "Summer Music Festival 2024" },
+          "category": { "type": "string", "example": "Music" },
+          "date": { "type": "string", "example": "Saturday, June 15" },
+          "month": { "type": "string", "example": "JUN" },
+          "day": { "type": "string", "example": "15" },
+          "location": { "type": "string", "example": "Central Park, Jakarta" },
+          "price": { "type": "string", "example": "IDR 250.000" },
+          "image": { "type": "string", "example": "https://images.unsplash.com/photo-1533174072545" },
+          "isTrending": { "type": "boolean", "example": true },
+          "organizerId": { "type": "integer", "example": 1 },
+          "description": { "type": "string", "example": "Join us for the ultimate summer celebration..." },
+          "type": { "type": "string", "example": "offline" },
+          "ticketType": { "type": "string", "example": "paid" },
+          "ticketsSold": { "type": "integer", "example": 150 },
+          "revenue": { "type": "integer", "example": 37500000 },
+          "views": { "type": "integer", "example": 1200 },
+          "checkins": { "type": "integer", "example": 120 }
+        }
+      },
+      "Ticket": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "userId": { "type": "integer", "example": 1 },
+          "eventId": { "type": "integer", "example": 1 },
+          "purchaseDate": { "type": "string", "format": "date-time", "example": "2026-05-20T10:00:00Z" },
+          "status": { "type": "string", "example": "active" },
+          "paymentMethod": { "type": "string", "example": "qris" },
+          "price": { "type": "string", "example": "IDR 250.000" },
+          "qrCode": { "type": "string", "example": "TKT-1-1-654928" }
+        }
+      }
+    }
+  }
+}
