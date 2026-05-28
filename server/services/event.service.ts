@@ -183,18 +183,18 @@ export class EventService {
           let resolvedHost = smtpHost;
           try {
             resolvedHost = await new Promise<string>((resolve, reject) => {
-              dns.lookup(smtpHost, (err, address) => {
+              dns.lookup(smtpHost, { family: 4 }, (err, address) => {
                 if (err) resolve(smtpHost); // fallback
                 else resolve(address);
               });
             });
-            console.log(`[Certificates] Pre-resolved SMTP host ${smtpHost} to ${resolvedHost}`);
+            console.log(`[Certificates] Pre-resolved SMTP host ${smtpHost} to IPv4 ${resolvedHost}`);
           } catch (dnsErr) {
             console.error(`[Certificates] System DNS lookup failed for ${smtpHost}`, dnsErr);
           }
 
           transporter = nodemailer.createTransport({
-            host: smtpHost,
+            host: resolvedHost,
             port: smtpPort,
             secure: smtpPort === 465,
             auth: {
