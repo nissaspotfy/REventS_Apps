@@ -44,6 +44,18 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
+// Serve Vite build output in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(process.cwd(), 'dist')));
+  
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.startsWith('/api-docs') || req.path.startsWith('/health')) {
+      return next();
+    }
+    res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+  });
+}
+
 // Start Server after DB sync & seeding
 const startServer = async () => {
   try {

@@ -8,6 +8,7 @@
     "server": "tsx server/server.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "vite build",
+    "start": "tsx server/server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
@@ -34,6 +35,8 @@
     "recharts": "^3.8.1",
     "sequelize": "^6.37.8",
     "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2",
     "vite": "^6.2.3"
   },
   "devDependencies": {
@@ -46,9 +49,6 @@
     "concurrently": "^9.2.1",
     "esbuild": "^0.25.0",
     "playwright": "^1.60.0",
-    "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "tailwindcss": "^4.1.14"
   }
 }

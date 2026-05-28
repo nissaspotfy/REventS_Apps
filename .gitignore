@@ -6,3 +6,11 @@ coverage/
 *.log
 .env*
 !.env.example
+compiled_app.js
+*.cjs
+inject.js
+fix-db.ts
+test-copilot.ts
+scratch/
+uploads/
+how_it_works_*.png
