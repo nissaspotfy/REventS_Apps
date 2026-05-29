@@ -2101,15 +2101,7 @@ export default function App() {
             </button>
           </div>
           <div className="flex items-center space-x-4">
-            {view !== 'landing' && view !== 'auth' && (
-               <button 
-                 onClick={toggleRole}
-                 className="hidden sm:flex items-center gap-2 px-3 py-1.5 border-2 border-indigo-100 dark:border-slate-800 bg-indigo-50 dark:bg-slate-800 rounded-full text-xs font-black text-indigo-700 dark:text-indigo-400 hover:border-indigo-600 transition-colors"
-               >
-                 <ArrowLeftRight className="w-3 h-3" />
-                 {role === 'organizer' ? t.organizerMode : t.audienceMode}
-               </button>
-            )}
+
             
             <nav className="hidden lg:flex space-x-6 mr-4 items-center border-r border-slate-200 dark:border-slate-800 pr-6">
               <button 
@@ -4151,7 +4143,7 @@ export default function App() {
 
   const DashboardView = () => (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors">
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-6 hidden lg:flex flex-col gap-6 transition-colors h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto no-scrollbar">
+      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-6 hidden lg:flex flex-col gap-6 transition-colors h-screen sticky top-0 overflow-y-auto no-scrollbar">
         <button onClick={() => setView('landing')} className="flex items-center text-2xl font-black text-indigo-600 tracking-tighter text-left ml-2 hover:opacity-90 transition-opacity">
           <span>REventS</span>
         </button>
@@ -6603,7 +6595,7 @@ export default function App() {
     </div>
   );
 
-  const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout';
+  const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
