@@ -1876,6 +1876,7 @@ export default function App() {
 
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+    setIsChatOpen(false);
   }, [view, audienceTab, organizerTab, managingSubView]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -4331,13 +4332,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl p-6 border border-indigo-100 dark:border-indigo-800/50 mb-8 flex gap-4 items-start">
-                    <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm text-indigo-600"><AlertCircle className="w-6 h-6" /></div>
-                    <div>
-                      <h4 className="font-black text-indigo-900 dark:text-indigo-100 mb-1">{t.aiSmartAlerts}</h4>
-                      <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{t.predictiveAlert}</p>
-                    </div>
-                  </div>
                 </motion.div>
               )}
 
@@ -5727,19 +5721,19 @@ export default function App() {
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm animate-in fade-in zoom-in-95 duration-200">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                         <h3 className="text-lg font-black text-slate-900 dark:text-white">Team Members</h3>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                           <input 
                             type="email" 
-                            placeholder="Email address" 
+                            placeholder="Invite email address..." 
                             value={newTeamMemberEmail}
                             onChange={e => setNewTeamMemberEmail(e.target.value)}
-                            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white"
+                            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white text-sm outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64 transition-all"
                           />
                           <button 
                             onClick={handleInviteTeamMember} 
-                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md hover:bg-indigo-700 transition-all flex items-center gap-2 shrink-0"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-indigo-600/20 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0"
                           >
-                            <Plus className="w-4 h-4"/> Invite
+                            <Plus className="w-4 h-4 stroke-[3]"/> Invite
                           </button>
                         </div>
                       </div>
