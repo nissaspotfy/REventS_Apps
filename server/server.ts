@@ -61,6 +61,56 @@ const startServer = async () => {
   try {
     await seedDatabase();
 
+    // Chromium Diagnostics
+    console.log(`========================================`);
+    console.log(`  Chromium Startup Diagnostics`);
+    console.log(`  PATH: ${process.env.PATH}`);
+    console.log(`  PUPPETEER_EXECUTABLE_PATH: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+    
+    // Test Chromium path lookup
+    const { execSync } = await import('child_process');
+    const fs = await import('fs');
+    const path = await import('path');
+    
+    let resolvedChromium: string | undefined;
+    try {
+      const pathEnv = process.env.PATH || '';
+      const paths = pathEnv.split(path.delimiter);
+      const binNames = ['chromium', 'chromium-browser', 'chrome', 'google-chrome'];
+      for (const p of paths) {
+        for (const bin of binNames) {
+          const fullPath = path.join(p, bin);
+          if (fs.existsSync(fullPath)) {
+            resolvedChromium = fullPath;
+            console.log(`  Diagnostics -> Found candidate in PATH: ${fullPath}`);
+          }
+        }
+      }
+    } catch (e) {
+      console.log(`  Diagnostics -> Error scanning PATH:`, e);
+    }
+    
+    try {
+      const commandPath = execSync('command -v chromium || command -v chromium-browser', { shell: '/bin/sh', stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+      console.log(`  Diagnostics -> command -v returned: ${commandPath}`);
+    } catch (e) {
+      console.log(`  Diagnostics -> command -v failed`);
+    }
+
+    const commonPaths = [
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/app/.nix-profile/bin/chromium',
+      '/nix/var/nix/profiles/default/bin/chromium',
+      '/run/current-system/sw/bin/chromium'
+    ];
+    for (const p of commonPaths) {
+      if (fs.existsSync(p)) {
+        console.log(`  Diagnostics -> Common path exists: ${p}`);
+      }
+    }
+    console.log(`========================================`);
+
     app.listen(PORT, () => {
       console.log(`========================================`);
       console.log(`  REventS Backend Server is running!`);

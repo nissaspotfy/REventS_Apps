@@ -4071,6 +4071,59 @@ export default function App() {
         </div>
         
         <div className="max-w-6xl relative z-10">
+          {/* Mobile Dashboard Navigation Bar */}
+          <div className="lg:hidden mb-8 -mx-8 px-8 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800/80 pb-3 flex gap-2 scroll-smooth">
+            {role === 'organizer' ? (
+              <>
+                <button onClick={() => switchOrganizerTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.dashboard}
+                </button>
+                <button onClick={() => switchOrganizerTab('aiEventCoPilot')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'aiEventCoPilot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.aiEventCoPilot}
+                </button>
+                <button onClick={() => switchOrganizerTab('myPublishedEvents')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'myPublishedEvents' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.myPublishedEvents}
+                </button>
+                <button onClick={() => switchOrganizerTab('attendeesLogistics')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'attendeesLogistics' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.attendeesLogistics}
+                </button>
+                <button onClick={() => switchOrganizerTab('communityImpact')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'communityImpact' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.communityImpact}
+                </button>
+                <button onClick={() => switchOrganizerTab('finance')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'finance' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.finance}
+                </button>
+                <button onClick={() => switchOrganizerTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'settings' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.settings}
+                </button>
+                <button onClick={() => { setShowCreateForm(false); setView('create-event'); clearCopilotState(); }} className="px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all text-indigo-650 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100/50 dark:border-indigo-900/40 hover:bg-indigo-100">
+                  + {t.createEvent}
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => { setView('landing'); clearCopilotState(); }} className="px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800">
+                  Explore
+                </button>
+                <button onClick={() => setAudienceTab('revasst')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'revasst' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  REvas'st
+                </button>
+                <button onClick={() => setAudienceTab('myTickets')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'myTickets' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.myTickets}
+                </button>
+                <button onClick={() => setAudienceTab('savedEvents')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'savedEvents' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.savedEvents}
+                </button>
+                <button onClick={() => setAudienceTab('interestPreferences')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'interestPreferences' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.interestPreferences}
+                </button>
+                <button onClick={() => setAudienceTab('accountPayment')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'accountPayment' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
+                  {t.accountPayment}
+                </button>
+              </>
+            )}
+          </div>
+
           {role === 'organizer' ? (
             <>
               {organizerTab === 'dashboard' && (

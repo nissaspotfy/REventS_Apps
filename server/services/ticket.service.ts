@@ -12,15 +12,58 @@ function getChromiumPath(): string | undefined {
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
   }
+
+  // 1. Manual scan of PATH directories (zero shell/which dependencies)
   try {
-    const path = execSync('which chromium || which chromium-browser', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
-    if (path) {
-      console.log(`[Tickets] Found system Chromium at: ${path}`);
-      return path;
+    const pathEnv = process.env.PATH || '';
+    const paths = pathEnv.split(path.delimiter);
+    const binNames = ['chromium', 'chromium-browser', 'chrome', 'google-chrome'];
+    for (const p of paths) {
+      for (const bin of binNames) {
+        const fullPath = path.join(p, bin);
+        if (fs.existsSync(fullPath)) {
+          try {
+            fs.accessSync(fullPath, fs.constants.X_OK);
+            console.log(`[Tickets] Found Chromium in PATH: ${fullPath}`);
+            return fullPath;
+          } catch (e) {}
+        }
+      }
     }
-  } catch (e) {
-    // Ignore and fallback
+  } catch (err) {
+    console.error('[Tickets] Error scanning PATH:', err);
   }
+
+  // 2. Try command -v as fallback
+  try {
+    const commandPath = execSync('command -v chromium || command -v chromium-browser', { shell: '/bin/sh', stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    if (commandPath) {
+      console.log(`[Tickets] Found Chromium via command -v: ${commandPath}`);
+      return commandPath;
+    }
+  } catch (e) {}
+
+  // 3. Scan common paths
+  const commonPaths = [
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chrome',
+    '/usr/bin/google-chrome',
+    '/app/.nix-profile/bin/chromium',
+    '/nix/var/nix/profiles/default/bin/chromium',
+    '/run/current-system/sw/bin/chromium'
+  ];
+  for (const p of commonPaths) {
+    if (fs.existsSync(p)) {
+      try {
+        fs.accessSync(p, fs.constants.X_OK);
+        console.log(`[Tickets] Found Chromium in common paths: ${p}`);
+        return p;
+      } catch (e) {}
+    }
+  }
+
+  console.warn('[Tickets] System Chromium not found, falling back to default.');
   return undefined;
 }
 
