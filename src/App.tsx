@@ -309,6 +309,15 @@ export default function App() {
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
   });
   const [role, setRole] = useState<Role>('audience');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [organizerTab, setOrganizerTab] = useState('dashboard');
   const [publishedEventsTab, setPublishedEventsTab] = useState<'published' | 'drafts' | 'past'>('published');
   const [managingEvent, setManagingEvent] = useState<any>(null);
@@ -6346,7 +6355,7 @@ export default function App() {
                     
                     <div className="space-y-4">
                       {/* Theme Appearance Card */}
-                      <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <div className="hidden lg:flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <div>
                           <h4 className="font-bold text-slate-900 dark:text-white">Theme Appearance</h4>
                           <p className="text-xs text-slate-500 mt-1">Switch between Light and Dark mode.</p>
@@ -6358,7 +6367,7 @@ export default function App() {
                       </div>
 
                       {/* Switch Mode Card */}
-                      <div className="flex lg:hidden items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <div className="hidden items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <div>
                           <h4 className="font-bold text-slate-900 dark:text-white">Switch Mode</h4>
                           <p className="text-xs text-slate-500 mt-1">Switch to Pro Organizer Mode to create and manage events.</p>
@@ -6382,7 +6391,7 @@ export default function App() {
                       </div>
 
                       {/* Sign Out Card */}
-                      <div className="flex lg:hidden items-center justify-between p-6 bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/30">
+                      <div className="hidden items-center justify-between p-6 bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/30">
                         <div>
                           <h4 className="font-bold text-red-650 dark:text-red-400">Sign Out</h4>
                           <p className="text-xs text-red-500 dark:text-red-350 mt-1">Log out of the current REventS session.</p>
@@ -6680,19 +6689,22 @@ export default function App() {
   );
 
   const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
+  
+  const showHeader = !isFullScreenView || (isMobile && (view === 'dashboard' || view === 'create-event'));
+  const useFullScreenLayout = isFullScreenView && !(isMobile && (view === 'dashboard' || view === 'create-event'));
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className={`min-h-screen font-sans bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 selection:bg-indigo-100 dark:selection:bg-indigo-900/50 ${isFullScreenView ? 'overflow-hidden h-screen' : 'overflow-x-hidden max-w-full w-full pt-16'} relative`}>
+      <div className={`min-h-screen font-sans bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 selection:bg-indigo-100 dark:selection:bg-indigo-900/50 ${useFullScreenLayout ? 'overflow-hidden h-screen' : 'overflow-x-hidden max-w-full w-full pt-16'} relative`}>
         {/* Slow glowing low-opacity background animation blobs */}
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none select-none">
           <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-tr from-indigo-500/10 to-purple-500/15 blur-[120px] animate-slow-glow-1" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-pink-500/10 to-indigo-500/15 blur-[120px] animate-slow-glow-2" />
           <div className="absolute top-[30%] left-[40%] w-[40%] h-[40%] rounded-full bg-gradient-to-r from-blue-500/5 to-cyan-500/10 blur-[140px] animate-slow-glow-3" />
         </div>
-        {!isFullScreenView && Header()}
+        {showHeader && Header()}
         
-        <div className={isFullScreenView ? 'h-full overflow-y-auto no-scrollbar pb-24 lg:pb-0' : 'pb-24 lg:pb-0'}>
+        <div className={useFullScreenLayout ? 'h-full overflow-y-auto no-scrollbar pb-24 lg:pb-0' : 'pb-24 lg:pb-0'}>
           <AnimatePresence mode="wait">
             {view === 'landing' && <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{LandingView()}</motion.div>}
 {view === 'auth' && <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{AuthView()}</motion.div>}
