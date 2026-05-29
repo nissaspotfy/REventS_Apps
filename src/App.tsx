@@ -1873,6 +1873,11 @@ export default function App() {
       chatMessagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages, isChatOpen]);
+
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [view, audienceTab, organizerTab, managingSubView]);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -4194,8 +4199,24 @@ export default function App() {
             </>
           ) : (
             <>
-              <button onClick={() => { setView('landing'); clearCopilotState(); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800`}><Globe className="w-5 h-5" /> Explore</button>
-              <button onClick={() => setAudienceTab('revasst')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${audienceTab === 'revasst' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}><Bot className="w-5 h-5" /> REvas'st</button>
+              <button 
+                onClick={() => {
+                  setView('dashboard');
+                  setAudienceTab('revasst');
+                }} 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === 'dashboard' && audienceTab === 'revasst' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              >
+                <Bot className="w-5 h-5" /> REvas'st
+              </button>
+              <button 
+                onClick={() => { 
+                  setView('landing'); 
+                  clearCopilotState(); 
+                }} 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === 'landing' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+              >
+                <Globe className="w-5 h-5" /> Explore
+              </button>
               <button onClick={() => setAudienceTab('myTickets')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${audienceTab === 'myTickets' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}><Ticket className="w-5 h-5" /> {t.myTickets}</button>
               <button onClick={() => setAudienceTab('savedEvents')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${audienceTab === 'savedEvents' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}><Bookmark className="w-5 h-5" /> {t.savedEvents}</button>
               <button onClick={() => setAudienceTab('interestPreferences')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${audienceTab === 'interestPreferences' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'}`}><Sliders className="w-5 h-5" /> {t.interestPreferences}</button>
@@ -6656,7 +6677,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 dark:border-slate-800 w-full relative">
+                  <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 pb-28 sm:pb-8 shadow-xl border border-slate-100 dark:border-slate-800 w-full relative">
                     <button 
                       onClick={() => {
                         setShowCreateForm(false);
@@ -7142,13 +7163,13 @@ export default function App() {
           whileHover={{ scale: 1.05 }} 
           whileTap={{ scale: 0.95 }} 
           onClick={() => setIsChatOpen(!isChatOpen)} 
-          className="hidden lg:flex fixed bottom-8 right-8 z-[90] items-center shadow-2xl justify-center space-x-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white pr-6 pl-2 py-2 rounded-full text-sm font-bold"
+          className="fixed bottom-24 right-6 lg:bottom-8 lg:right-8 z-[90] flex items-center shadow-2xl justify-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-2.5 lg:pr-6 lg:pl-2 lg:py-2 rounded-full text-sm font-bold"
         >
           <div className="bg-white/20 p-2 rounded-full relative">
             <Bot className="w-6 h-6" />
             <Sparkles className="w-3 h-3 absolute top-0 right-0 text-yellow-300" />
           </div>
-          <span>{isChatOpen ? 'Close Chat' : t.aiMatchmaker}</span>
+          <span className="hidden lg:inline ml-2">{isChatOpen ? 'Close Chat' : t.aiMatchmaker}</span>
         </motion.button>
 
         {/* Floating Bottom Navigation Bar for Mobile */}
@@ -7239,20 +7260,20 @@ export default function App() {
               </>
             ) : (
               <>
-                {/* Left tab 1: Explore */}
+                {/* Left tab 1: REva'st */}
                 <button
                   onClick={() => {
-                    setView('landing');
-                    clearCopilotState();
+                    setView('dashboard');
+                    setAudienceTab('revasst');
                   }}
                   className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
-                    view === 'landing'
+                    view === 'dashboard' && audienceTab === 'revasst'
                       ? 'text-indigo-600 dark:text-indigo-400 font-black'
                       : 'text-slate-400 dark:text-slate-500 font-bold'
                   }`}
                 >
-                  <Globe className="w-5 h-5" />
-                  <span className="text-[10px] tracking-tight">Explore</span>
+                  <Bot className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">REva'st</span>
                 </button>
 
                 {/* Left tab 2: Tickets */}
@@ -7271,24 +7292,17 @@ export default function App() {
                   <span className="text-[10px] tracking-tight">Tickets</span>
                 </button>
 
-                {/* Center Menonjol: REva'st Chatbot */}
-                <div className="flex flex-col items-center justify-center shrink-0">
-                  <button
-                    onClick={() => {
-                      setIsChatOpen(!isChatOpen);
-                    }}
-                    className="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 -mt-7 rounded-full flex items-center justify-center shadow-lg shadow-purple-600/35 border-4 border-white dark:border-slate-900 transition-all hover:scale-105 active:scale-95 shrink-0 animate-pulse relative"
-                    title="REva'st AI Chatbot"
-                  >
-                    <Bot className="w-7 h-7" />
-                    <Sparkles className="w-3.5 h-3.5 absolute top-1 right-1 text-yellow-300 animate-bounce" />
-                  </button>
-                  {isChatOpen && (
-                    <span className="text-[10px] tracking-tight font-black text-indigo-600 dark:text-indigo-400 mt-1">
-                      REva'st
-                    </span>
-                  )}
-                </div>
+                {/* Center Menonjol: Explore */}
+                <button
+                  onClick={() => {
+                    setView('landing');
+                    clearCopilotState();
+                  }}
+                  className="bg-indigo-600 dark:bg-indigo-500 text-white w-14 h-14 -mt-7 rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/35 border-4 border-white dark:border-slate-900 transition-all hover:scale-105 active:scale-95 shrink-0"
+                  title="Explore Events"
+                >
+                  <Globe className="w-7 h-7" />
+                </button>
 
                 {/* Right tab 1: Saved */}
                 <button
