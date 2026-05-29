@@ -1,8 +1,8 @@
 [phases.setup]
 aptPkgs = [
+  "...",
   "wget",
   "ca-certificates",
-  "libgconf-2-4",
   "libnss3",
   "libxss1",
   "libasound2",
@@ -22,3 +22,4 @@ aptPkgs = [
   "libxrandr2",
   "libxshmfence1"
 ]
+
