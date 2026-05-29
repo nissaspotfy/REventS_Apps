@@ -4234,58 +4234,6 @@ export default function App() {
         </div>
         
         <div className="max-w-6xl relative z-10">
-          {/* Mobile Dashboard Navigation Bar */}
-          <div className="lg:hidden mb-8 -mx-8 px-8 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800/80 pb-3 flex gap-2 scroll-smooth">
-            {role === 'organizer' ? (
-              <>
-                <button onClick={() => switchOrganizerTab('dashboard')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'dashboard' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.dashboard}
-                </button>
-                <button onClick={() => switchOrganizerTab('aiEventCoPilot')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'aiEventCoPilot' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.aiEventCoPilot}
-                </button>
-                <button onClick={() => switchOrganizerTab('myPublishedEvents')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'myPublishedEvents' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.myPublishedEvents}
-                </button>
-                <button onClick={() => switchOrganizerTab('attendeesLogistics')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'attendeesLogistics' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.attendeesLogistics}
-                </button>
-                <button onClick={() => switchOrganizerTab('communityImpact')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'communityImpact' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.communityImpact}
-                </button>
-                <button onClick={() => switchOrganizerTab('finance')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'finance' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.finance}
-                </button>
-                <button onClick={() => switchOrganizerTab('settings')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${organizerTab === 'settings' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.settings}
-                </button>
-                <button onClick={() => { setShowCreateForm(false); setView('create-event'); clearCopilotState(); }} className="px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all text-indigo-650 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100/50 dark:border-indigo-900/40 hover:bg-indigo-100">
-                  + {t.createEvent}
-                </button>
-              </>
-            ) : (
-              <>
-                <button onClick={() => { setView('landing'); clearCopilotState(); }} className="px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800">
-                  Explore
-                </button>
-                <button onClick={() => setAudienceTab('revasst')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'revasst' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  REvas'st
-                </button>
-                <button onClick={() => setAudienceTab('myTickets')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'myTickets' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.myTickets}
-                </button>
-                <button onClick={() => setAudienceTab('savedEvents')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'savedEvents' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.savedEvents}
-                </button>
-                <button onClick={() => setAudienceTab('interestPreferences')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'interestPreferences' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.interestPreferences}
-                </button>
-                <button onClick={() => setAudienceTab('accountPayment')} className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition-all ${audienceTab === 'accountPayment' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-800'}`}>
-                  {t.accountPayment}
-                </button>
-              </>
-            )}
-          </div>
 
           {role === 'organizer' ? (
             <>
@@ -4296,6 +4244,37 @@ export default function App() {
                       <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{t.dashboard}</h2>
                       <p className="text-slate-500 dark:text-slate-400 font-medium">{t.overviewDesc}</p>
                     </div>
+                  </div>
+
+                  {/* Mobile Shortcut Grid */}
+                  <div className="lg:hidden grid grid-cols-3 gap-4 mb-8">
+                    <button
+                      onClick={() => switchOrganizerTab('attendeesLogistics')}
+                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transition-all gap-2"
+                    >
+                      <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl flex items-center justify-center text-indigo-600">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-355 tracking-wider">Logistics</span>
+                    </button>
+                    <button
+                      onClick={() => switchOrganizerTab('communityImpact')}
+                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transition-all gap-2"
+                    >
+                      <div className="w-10 h-10 bg-pink-50 dark:bg-pink-950/40 rounded-xl flex items-center justify-center text-pink-600">
+                        <HeartHandshake className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-355 tracking-wider">Impact</span>
+                    </button>
+                    <button
+                      onClick={() => switchOrganizerTab('finance')}
+                      className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center hover:scale-105 active:scale-95 transition-all gap-2"
+                    >
+                      <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl flex items-center justify-center text-emerald-600">
+                        <CreditCard className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-355 tracking-wider">Finance</span>
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -5577,6 +5556,12 @@ export default function App() {
                     <button onClick={() => setSettingsTab('general')} className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${settingsTab === 'general' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>General Profile</button>
                     <button onClick={() => setSettingsTab('payout')} className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${settingsTab === 'payout' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>Payout Method</button>
                     <button onClick={() => setSettingsTab('team')} className={`px-6 py-2 rounded-xl font-bold text-sm transition-all ${settingsTab === 'team' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>Team Members</button>
+                    <button 
+                      onClick={handleSignOut} 
+                      className="lg:hidden px-6 py-2 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5"
+                    >
+                      <LogOut className="w-4 h-4" /> {t.signOut}
+                    </button>
                   </div>
 
                   {settingsTab === 'general' && (
@@ -6260,17 +6245,57 @@ export default function App() {
                     </div>
                   </div>
                   <div className="mt-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-8 sm:p-12">
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Preferences</h3>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Preferences & Settings</h3>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">Customize your application experience.</p>
-                    <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
-                      <div>
-                        <h4 className="font-bold text-slate-900 dark:text-white">Theme Appearance</h4>
-                        <p className="text-xs text-slate-500 mt-1">Switch between Light and Dark mode.</p>
+                    
+                    <div className="space-y-4">
+                      {/* Theme Appearance Card */}
+                      <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-white">Theme Appearance</h4>
+                          <p className="text-xs text-slate-500 mt-1">Switch between Light and Dark mode.</p>
+                        </div>
+                        <button onClick={toggleTheme} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-xl text-sm border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
+                          {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                          {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                        </button>
                       </div>
-                      <button onClick={toggleTheme} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-xl text-sm border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors shadow-sm">
-                        {theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                        {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-                      </button>
+
+                      {/* Switch Mode Card */}
+                      <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-white">Switch Mode</h4>
+                          <p className="text-xs text-slate-500 mt-1">Switch to Pro Organizer Mode to create and manage events.</p>
+                        </div>
+                        <button onClick={toggleRole} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-md">
+                          <ArrowLeftRight className="w-4 h-4" />
+                          Organizer Mode
+                        </button>
+                      </div>
+
+                      {/* Interest Preferences Card */}
+                      <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-white">Interest Preferences</h4>
+                          <p className="text-xs text-slate-500 mt-1">Update preferences to help AI find the best events.</p>
+                        </div>
+                        <button onClick={() => setShowInterestModal(true)} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-xl text-sm border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-650 transition-colors shadow-sm">
+                          <Sliders className="w-4 h-4 text-indigo-600" />
+                          Configure
+                        </button>
+                      </div>
+
+                      {/* Sign Out Card */}
+                      <div className="flex items-center justify-between p-6 bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/30">
+                        <div>
+                          <h4 className="font-bold text-red-650 dark:text-red-400">Sign Out</h4>
+                          <p className="text-xs text-red-500 dark:text-red-350 mt-1">Log out of the current REventS session.</p>
+                        </div>
+                        <button onClick={handleSignOut} className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-sm transition-all shadow-md">
+                          <LogOut className="w-4 h-4" />
+                          Sign Out
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -6571,7 +6596,7 @@ export default function App() {
         </div>
         {!isFullScreenView && Header()}
         
-        <div className={isFullScreenView ? 'h-full overflow-y-auto no-scrollbar' : ''}>
+        <div className={isFullScreenView ? 'h-full overflow-y-auto no-scrollbar pb-24 lg:pb-0' : 'pb-24 lg:pb-0'}>
           <AnimatePresence mode="wait">
             {view === 'landing' && <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{LandingView()}</motion.div>}
 {view === 'auth' && <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>{AuthView()}</motion.div>}
@@ -7119,6 +7144,174 @@ export default function App() {
           </div>
           <span>{isChatOpen ? 'Close Chat' : t.aiMatchmaker}</span>
         </motion.button>
+
+        {/* Floating Bottom Navigation Bar for Mobile */}
+        {isAuthenticated && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800/80 px-2 py-2 pb-safe shadow-lg flex justify-around items-center">
+            {role === 'organizer' ? (
+              <>
+                {/* Left tab 1: Dashboard */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    switchOrganizerTab('dashboard');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && organizerTab === 'dashboard'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <LayoutDashboard className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Dashboard</span>
+                </button>
+
+                {/* Left tab 2: Events */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    switchOrganizerTab('myPublishedEvents');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && organizerTab === 'myPublishedEvents'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <CalendarDays className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Events</span>
+                </button>
+
+                {/* Center Menonjol: Create Event */}
+                <button
+                  onClick={() => {
+                    setEventEditReturnContext({
+                      organizerTab: 'myPublishedEvents',
+                      publishedEventsTab: 'published',
+                      managingEvent: null
+                    });
+                    setShowCreateForm(true);
+                    setView('create-event');
+                  }}
+                  className="bg-indigo-600 dark:bg-indigo-500 text-white w-14 h-14 -mt-7 rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/35 border-4 border-white dark:border-slate-900 transition-all hover:scale-105 active:scale-95 shrink-0"
+                  title="Create Event"
+                >
+                  <Plus className="w-7 h-7 stroke-[3]" />
+                </button>
+
+                {/* Right tab 1: Rev Co-pilot */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    switchOrganizerTab('aiEventCoPilot');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && organizerTab === 'aiEventCoPilot'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <BrainCircuit className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Co-pilot</span>
+                </button>
+
+                {/* Right tab 2: Menu / Account */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    switchOrganizerTab('settings');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && organizerTab === 'settings'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <UserIcon className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Menu</span>
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Left tab 1: Explore */}
+                <button
+                  onClick={() => {
+                    setView('landing');
+                    clearCopilotState();
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'landing'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <Globe className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Explore</span>
+                </button>
+
+                {/* Left tab 2: Tickets */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    setAudienceTab('myTickets');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && audienceTab === 'myTickets'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <Ticket className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Tickets</span>
+                </button>
+
+                {/* Center Menonjol: REva'st Chatbot */}
+                <button
+                  onClick={() => {
+                    setIsChatOpen(!isChatOpen);
+                  }}
+                  className="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 -mt-7 rounded-full flex items-center justify-center shadow-lg shadow-purple-600/35 border-4 border-white dark:border-slate-900 transition-all hover:scale-105 active:scale-95 shrink-0 animate-pulse relative"
+                  title="REva'st AI Chatbot"
+                >
+                  <Bot className="w-7 h-7" />
+                  <Sparkles className="w-3.5 h-3.5 absolute top-1 right-1 text-yellow-300 animate-bounce" />
+                </button>
+
+                {/* Right tab 1: Saved */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    setAudienceTab('savedEvents');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && audienceTab === 'savedEvents'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <Bookmark className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Saved</span>
+                </button>
+
+                {/* Right tab 2: Account */}
+                <button
+                  onClick={() => {
+                    setView('dashboard');
+                    setAudienceTab('accountPayment');
+                  }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${
+                    view === 'dashboard' && audienceTab === 'accountPayment'
+                      ? 'text-indigo-600 dark:text-indigo-400 font-black'
+                      : 'text-slate-400 dark:text-slate-500 font-bold'
+                  }`}
+                >
+                  <UserCircle className="w-5 h-5" />
+                  <span className="text-[10px] tracking-tight">Account</span>
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
       </div>
