@@ -11,7 +11,7 @@
     "start": "tsx server/server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "postinstall": "npx puppeteer install",
+    "postinstall": "node -e \"if (!process.env.CI && process.env.NODE_ENV !== 'production') { try { require('child_process').execSync('npx puppeteer install', {stdio: 'inherit'}); } catch(e){} }\"",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
