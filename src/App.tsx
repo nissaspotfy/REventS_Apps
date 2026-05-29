@@ -828,6 +828,9 @@ export default function App() {
     setEventPosterUrl(ev.image || null);
     setEventTicketName(ev.ticketName || 'Standard Ticket');
     setProvideCertificate(!!ev.provideCertificate);
+    setEventIsExternal(!!ev.isExternal);
+    setEventExternalUrl(ev.externalUrl || '');
+    setEventExternalProvider(ev.externalProvider || '');
 
     setManagingEvent(null);
     setView('create-event');
@@ -1261,7 +1264,10 @@ export default function App() {
         ticketName: eventTicketName,
         onlineLink: eventOnlineLink,
         status: status,
-        provideCertificate: ['Tech', 'Sports', 'Culture'].includes(eventCategory) ? provideCertificate : false
+        provideCertificate: ['Tech', 'Sports', 'Culture'].includes(eventCategory) ? provideCertificate : false,
+        isExternal: eventIsExternal,
+        externalUrl: eventIsExternal ? eventExternalUrl : undefined,
+        externalProvider: eventIsExternal ? eventExternalProvider : undefined
       };
 
       let savedEvent: any = null;
@@ -1294,6 +1300,9 @@ export default function App() {
       setEventCapacity('100');
       setEditingEventId(null);
       setProvideCertificate(false);
+      setEventIsExternal(false);
+      setEventExternalUrl('');
+      setEventExternalProvider('');
 
       // Reset Copilot state
       setCopilotInput('');
@@ -1829,6 +1838,9 @@ export default function App() {
       setShowCreateForm(false);
       setEventEditReturnContext(null);
       setProvideCertificate(false);
+      setEventIsExternal(false);
+      setEventExternalUrl('');
+      setEventExternalProvider('');
     }
 
     // 2. If we left 'landing' view (Explore Events)
@@ -1932,6 +1944,14 @@ export default function App() {
   const [eventDescFull, setEventDescFull] = useState('');
   const [eventPosterUrl, setEventPosterUrl] = useState<string | null>(null);
 
+  // External Event and Redirection States
+  const [redirectingEvent, setRedirectingEvent] = useState<any>(null);
+  const [redirectProgress, setRedirectProgress] = useState(0);
+  const redirectIntervalRef = React.useRef<any>(null);
+  const [eventIsExternal, setEventIsExternal] = useState(false);
+  const [eventExternalUrl, setEventExternalUrl] = useState('');
+  const [eventExternalProvider, setEventExternalProvider] = useState('');
+
   const clearCopilotState = () => {
     setCopilotInput('');
     setCopilotResult(null);
@@ -2023,9 +2043,38 @@ export default function App() {
   };
 
   const handleGetTickets = (event: any) => {
+    if (event.isExternal) {
+      setSelectedEvent(event);
+      setRedirectingEvent(event);
+      setRedirectProgress(0);
+      if (redirectIntervalRef.current) {
+        clearInterval(redirectIntervalRef.current);
+      }
+      
+      let progress = 0;
+      redirectIntervalRef.current = setInterval(() => {
+        progress += 5;
+        setRedirectProgress(progress);
+        if (progress >= 100) {
+          clearInterval(redirectIntervalRef.current);
+          window.open(event.externalUrl || '#', '_blank');
+          setRedirectingEvent(null);
+        }
+      }, 80); // 80ms * 20 = 1.6 seconds total
+      return;
+    }
+
     setSelectedEvent(event);
     setPreviousView(view);
     setCheckoutModal('preview');
+  };
+
+  const handleCancelRedirect = () => {
+    if (redirectIntervalRef.current) {
+      clearInterval(redirectIntervalRef.current);
+    }
+    setRedirectingEvent(null);
+    setRedirectProgress(0);
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -2330,7 +2379,7 @@ export default function App() {
     <div className="bg-white dark:bg-slate-950 transition-colors min-h-screen">
       <section className="px-8 py-8 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-4 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 mb-4">
             <div className="relative flex-grow">
               <span className="absolute inset-y-0 left-4 flex items-center text-slate-400"><Search className="w-5 h-5" /></span>
               <input type="text" placeholder={t.searchPlaceholder} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium dark:text-white" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -2339,6 +2388,29 @@ export default function App() {
               <span className="absolute inset-y-0 left-4 flex items-center text-slate-400"><MapPin className="w-5 h-5" /></span>
               <input type="text" placeholder={t.locationPlaceholder} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium dark:text-white" value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} />
             </div>
+          </div>
+
+          {/* Quick Location Pills */}
+          <div className="flex items-center gap-2 mb-8 flex-wrap">
+            <span className="text-xs font-black text-slate-400 dark:text-slate-500 mr-2 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" /> {lang === 'id' ? 'Wilayah Populer:' : 'Popular Locations:'}
+            </span>
+            {[
+              { name: lang === 'id' ? 'Semua Wilayah' : 'All Regions', query: '' },
+              { name: lang === 'id' ? 'Indonesia (Global)' : 'Indonesia (Global)', query: 'Indonesia' },
+              { name: 'Jakarta', query: 'Jakarta' },
+              { name: 'Bali', query: 'Bali' },
+              { name: 'Bandung', query: 'Bandung' },
+              { name: 'Yogyakarta', query: 'Yogyakarta' }
+            ].map(loc => (
+              <button 
+                key={loc.name}
+                onClick={() => setLocationQuery(loc.query)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${locationQuery.toLowerCase() === loc.query.toLowerCase() ? 'bg-indigo-650 border-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none font-extrabold' : 'bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-400 border-slate-200 dark:border-slate-750 hover:bg-slate-50 dark:hover:bg-slate-700 hover:scale-105 active:scale-95'}`}
+              >
+                {loc.name}
+              </button>
+            ))}
           </div>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex space-x-4 overflow-x-auto pb-2 no-scrollbar">
@@ -2456,6 +2528,13 @@ export default function App() {
                       <div className="absolute bottom-3 left-3">
                         <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center">
                           <TrendingUp className="w-3 h-3 mr-1" /> {t.trending}
+                        </span>
+                      </div>
+                    )}
+                    {event.isExternal && (
+                      <div className="absolute top-3 left-14">
+                        <span className="bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md border border-white/20">
+                          {event.externalProvider || 'Eksternal'}
                         </span>
                       </div>
                     )}
@@ -6774,6 +6853,9 @@ export default function App() {
                         setEventPrice('150000');
                         setEventCapacity('100');
                         setProvideCertificate(false);
+                        setEventIsExternal(false);
+                        setEventExternalUrl('');
+                        setEventExternalProvider('');
 
                         if (eventEditReturnContext) {
                           setView('dashboard');
@@ -6949,37 +7031,102 @@ export default function App() {
                       {/* 4. Ticket Configuration */}
                       <div>
                         <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Ticket Settings</h3>
-                        <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
-                          <div className="space-y-4">
+                        
+                        {/* External Event Toggle */}
+                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 mb-4">
+                          <div className="text-left">
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">Event Eksternal (Aggregator Mode)</span>
+                            <p className="text-xs text-slate-550 dark:text-slate-400 mt-0.5">
+                              Aktifkan jika pendaftaran tiket dilakukan melalui platform eksternal (seperti Loket.com, Eventbrite, Klook, dsb).
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setEventIsExternal(!eventIsExternal)}
+                            className={`w-12 h-6 rounded-full transition-colors relative flex items-center shrink-0 ${eventIsExternal ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-650'}`}
+                          >
+                            <span className="sr-only">Toggle Event Eksternal</span>
+                            <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${eventIsExternal ? 'left-7' : 'left-1'}`} />
+                          </button>
+                        </div>
+
+                        {eventIsExternal ? (
+                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
-                                <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Provider Eksternal <span className="text-red-500">*</span></label>
+                                <input 
+                                  type="text" 
+                                  placeholder="e.g. Loket.com, Eventbrite, Klook" 
+                                  value={eventExternalProvider} 
+                                  onChange={e => setEventExternalProvider(e.target.value)} 
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+                                />
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Type <span className="text-red-500">*</span></label>
-                                <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
-                                  <option value="paid">Paid</option>
-                                  <option value="free">Free</option>
-                                </select>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tautan Pendaftaran (URL) <span className="text-red-500">*</span></label>
+                                <input 
+                                  type="url" 
+                                  placeholder="https://" 
+                                  value={eventExternalUrl} 
+                                  onChange={e => setEventExternalUrl(e.target.value)} 
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+                                />
                               </div>
                             </div>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Price (IDR)</label>
-                                <div className="relative">
-                                  <span className="absolute left-4 top-3 text-slate-500 font-bold">Rp</span>
-                                  <input type="number" disabled={ticketType === 'free'} placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className={`w-full pl-12 pr-4 py-3 rounded-xl border ${ticketType === 'free' ? 'bg-slate-100 dark:bg-slate-900 border-transparent text-slate-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white'} focus:ring-2 focus:ring-indigo-500 outline-none`} />
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenis Tiket Tampilan <span className="text-red-500">*</span></label>
+                                <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                                  <option value="paid">Paid</option>
+                                  <option value="free">Free</option>
+                                </select>
+                              </div>
+                              {ticketType !== 'free' && (
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Harga Tiket Tampilan (IDR)</label>
+                                  <div className="relative">
+                                    <span className="absolute left-4 top-3 text-slate-500 font-bold">Rp</span>
+                                    <input type="number" placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
+                                  <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Type <span className="text-red-500">*</span></label>
+                                  <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                                    <option value="paid">Paid</option>
+                                    <option value="free">Free</option>
+                                  </select>
                                 </div>
                               </div>
-                              <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
-                                <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Price (IDR)</label>
+                                  <div className="relative">
+                                    <span className="absolute left-4 top-3 text-slate-500 font-bold">Rp</span>
+                                    <input type="number" disabled={ticketType === 'free'} placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className={`w-full pl-12 pr-4 py-3 rounded-xl border ${ticketType === 'free' ? 'bg-slate-100 dark:bg-slate-900 border-transparent text-slate-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white'} focus:ring-2 focus:ring-indigo-500 outline-none`} />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
+                                  <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 justify-end">
@@ -7384,6 +7531,105 @@ export default function App() {
               </motion.div>
             );
           })()}
+        </AnimatePresence>
+
+        {/* External Event Redirecting Modal */}
+        <AnimatePresence>
+          {redirectingEvent && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="fixed inset-0 bg-slate-950/80 z-[150] flex items-center justify-center p-4 backdrop-blur-md"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }} 
+                animate={{ scale: 1, y: 0 }} 
+                exit={{ scale: 0.9, y: 20 }} 
+                className="bg-slate-900/90 dark:bg-slate-950/95 border border-indigo-500/20 text-white w-full max-w-md rounded-[2.5rem] shadow-[0_0_50px_rgba(99,102,241,0.25)] overflow-hidden flex flex-col p-8 relative"
+              >
+                {/* Close/Cancel top-right button */}
+                <button 
+                  onClick={handleCancelRedirect} 
+                  className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all hover:scale-105 active:scale-95 z-20"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Decorative glowing backdrops */}
+                <div className="absolute top-[-50px] left-[-50px] w-48 h-48 bg-indigo-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+                <div className="absolute bottom-[-50px] right-[-50px] w-48 h-48 bg-purple-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+
+                <div className="flex flex-col items-center text-center space-y-6 relative z-10 py-4">
+                  {/* Glowing Spinner Icon Container */}
+                  <div className="relative w-24 h-24 flex items-center justify-center">
+                    {/* Ring background */}
+                    <div className="absolute inset-0 rounded-full border-4 border-slate-700/50"></div>
+                    {/* Rotating gradient ring */}
+                    <motion.div 
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                      className="absolute inset-0 rounded-full border-4 border-transparent border-t-indigo-500 border-r-indigo-400"
+                    ></motion.div>
+                    
+                    {/* Globe icon in the center */}
+                    <div className="bg-slate-800 text-indigo-400 rounded-full p-4 shadow-inner">
+                      <Globe className="w-8 h-8 animate-pulse" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-tight">
+                      Mengarahkan Anda ke Platform Asli
+                    </h3>
+                    <p className="text-sm text-slate-400 font-medium leading-relaxed">
+                      Anda sedang dialihkan ke platform <strong>{redirectingEvent.externalProvider || 'Penyedia Eksternal'}</strong> untuk menyelesaikan pendaftaran secara resmi.
+                    </p>
+                  </div>
+
+                  {/* Visual Connection Card */}
+                  <div className="w-full bg-slate-850/60 border border-slate-700/40 p-4 rounded-2xl flex items-center justify-between text-left gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-900 border border-slate-700 shrink-0">
+                        <img src={redirectingEvent.image} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="truncate min-w-0">
+                        <h4 className="text-xs font-bold text-white truncate">{redirectingEvent.title}</h4>
+                        <span className="text-[10px] text-slate-400">{redirectingEvent.location.split(',')[0]}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 bg-indigo-500/10 rounded-md border border-indigo-500/20">
+                        {redirectingEvent.externalProvider || 'Partner'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress Line */}
+                  <div className="w-full space-y-2">
+                    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                      <motion.div 
+                        className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+                        animate={{ width: `${redirectProgress}%` }}
+                        transition={{ ease: "easeInOut" }}
+                      ></motion.div>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">
+                      <span>REventS Discovery</span>
+                      <span>{redirectProgress}%</span>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleCancelRedirect}
+                    className="px-6 py-2.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Batal & Tetap di REventS
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {/* Checkout Modal Flow */}

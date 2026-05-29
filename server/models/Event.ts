@@ -31,6 +31,9 @@ export class Event extends Model {
   public provideCertificate?: boolean;
   public certificateReleased?: boolean;
   public certificateTemplateUrl?: string;
+  public isExternal!: boolean;
+  public externalUrl?: string;
+  public externalProvider?: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -164,6 +167,19 @@ Event.init(
     },
     certificateTemplateUrl: {
       type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    isExternal: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    externalUrl: {
+      type: DataTypes.STRING(1000),
+      allowNull: true,
+    },
+    externalProvider: {
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
   },

@@ -181,11 +181,165 @@ export async function seedDatabase() {
           views: 620,
           checkins: 40,
           status: 'active'
+        },
+        {
+          id: 7,
+          title: "Java Jazz Festival 2026",
+          category: "Music",
+          date: "Friday, June 12",
+          month: "JUN",
+          day: "12",
+          location: "JIExpo Kemayoran, Jakarta",
+          price: "IDR 950.000",
+          image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          isTrending: true,
+          organizerId: 1,
+          description: "The legendary Jakarta International Java Jazz Festival is back with stellar international lineups and local jazz legends. Catch multiple stages, delicious culinary options, and unforgettable memories.",
+          type: "offline",
+          ticketType: "paid",
+          ticketsSold: 0,
+          revenue: 0,
+          views: 120,
+          checkins: 0,
+          status: 'active',
+          isExternal: true,
+          externalUrl: "https://www.javajazzfestival.com",
+          externalProvider: "Loket.com"
+        },
+        {
+          id: 8,
+          title: "Bali Cultural & Arts Festival 2026",
+          category: "Culture",
+          date: "Wednesday, July 1",
+          month: "JUL",
+          day: "01",
+          location: "Denpasar, Bali",
+          price: "IDR 150.000",
+          image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+          isTrending: false,
+          organizerId: 1,
+          description: "Immerse yourself in Balinese traditional dances, crafts, and theatrical performances in the heart of Bali's capital. Explore the beautiful heritage of Indonesia.",
+          type: "offline",
+          ticketType: "paid",
+          ticketsSold: 0,
+          revenue: 0,
+          views: 85,
+          checkins: 0,
+          status: 'active',
+          isExternal: true,
+          externalUrl: "https://www.klook.com/en-ID/activity/99999-bali-cultural-arts-festival/",
+          externalProvider: "Klook"
+        },
+        {
+          id: 9,
+          title: "Indonesia Tech Summit 2026",
+          category: "Tech",
+          date: "Monday, August 10",
+          month: "AUG",
+          day: "10",
+          location: "JCC Senayan, Jakarta",
+          price: "Free",
+          image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80",
+          isTrending: true,
+          organizerId: 1,
+          description: "Connect with tech leaders, startups, and investors across Indonesia. Discover cutting-edge innovations in AI, Web3, and sustainability. Featuring panel talks, workshops, and startup booths.",
+          type: "offline",
+          ticketType: "free",
+          ticketsSold: 0,
+          revenue: 0,
+          views: 240,
+          checkins: 0,
+          status: 'active',
+          isExternal: true,
+          externalUrl: "https://www.eventbrite.com/e/indonesia-tech-summit-2026-tickets-987654321",
+          externalProvider: "Eventbrite"
         }
       ];
 
       await Event.bulkCreate(initialEvents);
       console.log('Events seeded.');
+    }
+
+    // Ensure external events exist even if some events were already seeded
+    const externalCount = await Event.count({ where: { isExternal: true } });
+    if (externalCount === 0) {
+      console.log('Seeding initial external events (aggregator mode)...');
+      const externalEvents = [
+        {
+          id: 7,
+          title: "Java Jazz Festival 2026",
+          category: "Music",
+          date: "Friday, June 12",
+          month: "JUN",
+          day: "12",
+          location: "JIExpo Kemayoran, Jakarta",
+          price: "IDR 950.000",
+          image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+          isTrending: true,
+          organizerId: 1,
+          description: "The legendary Jakarta International Java Jazz Festival is back with stellar international lineups and local jazz legends. Catch multiple stages, delicious culinary options, and unforgettable memories.",
+          type: "offline",
+          ticketType: "paid",
+          ticketsSold: 0,
+          revenue: 0,
+          views: 120,
+          checkins: 0,
+          status: 'active',
+          isExternal: true,
+          externalUrl: "https://www.javajazzfestival.com",
+          externalProvider: "Loket.com"
+        },
+        {
+          id: 8,
+          title: "Bali Cultural & Arts Festival 2026",
+          category: "Culture",
+          date: "Wednesday, July 1",
+          month: "JUL",
+          day: "01",
+          location: "Denpasar, Bali",
+          price: "IDR 150.000",
+          image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+          isTrending: false,
+          organizerId: 1,
+          description: "Immerse yourself in Balinese traditional dances, crafts, and theatrical performances in the heart of Bali's capital. Explore the beautiful heritage of Indonesia.",
+          type: "offline",
+          ticketType: "paid",
+          ticketsSold: 0,
+          revenue: 0,
+          views: 85,
+          checkins: 0,
+          status: 'active',
+          isExternal: true,
+          externalUrl: "https://www.klook.com/en-ID/activity/99999-bali-cultural-arts-festival/",
+          externalProvider: "Klook"
+        },
+        {
+          id: 9,
+          title: "Indonesia Tech Summit 2026",
+          category: "Tech",
+          date: "Monday, August 10",
+          month: "AUG",
+          day: "10",
+          location: "JCC Senayan, Jakarta",
+          price: "Free",
+          image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80",
+          isTrending: true,
+          organizerId: 1,
+          description: "Connect with tech leaders, startups, and investors across Indonesia. Discover cutting-edge innovations in AI, Web3, and sustainability. Featuring panel talks, workshops, and startup booths.",
+          type: "offline",
+          ticketType: "free",
+          ticketsSold: 0,
+          revenue: 0,
+          views: 240,
+          checkins: 0,
+          status: 'active',
+          isExternal: true,
+          externalUrl: "https://www.eventbrite.com/e/indonesia-tech-summit-2026-tickets-987654321",
+          externalProvider: "Eventbrite"
+        }
+      ];
+      await Event.bulkCreate(externalEvents);
+      console.log('External events seeded successfully.');
     }
 
     // Seed Tickets
@@ -227,6 +381,20 @@ export async function seedDatabase() {
 
       await Ticket.bulkCreate(initialTickets as any);
       console.log('Tickets seeded.');
+    }
+
+    // Ensure all physical event locations include ', Indonesia'
+    try {
+      const allDbEvents = await Event.findAll();
+      for (const ev of allDbEvents) {
+        if (ev.location && ev.location.toLowerCase() !== 'online' && !ev.location.toLowerCase().includes('indonesia')) {
+          ev.location = `${ev.location}, Indonesia`;
+          await ev.save();
+        }
+      }
+      console.log('Event locations synced with Indonesia suffix.');
+    } catch (locErr) {
+      console.error('Error syncing event locations:', locErr);
     }
   } catch (error) {
     console.error('Error seeding database:', error);

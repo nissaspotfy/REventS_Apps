@@ -70,7 +70,10 @@ export class EventController {
         ticketName,
         provideCertificate,
         certificateReleased,
-        certificateTemplateUrl
+        certificateTemplateUrl,
+        isExternal,
+        externalUrl,
+        externalProvider
       } = req.body;
       if (!title || !category || !date || !location || !price) {
         res.status(400).json({ error: 'Missing required event fields (title, category, date, location, price).' });
@@ -95,7 +98,10 @@ export class EventController {
         ticketName,
         provideCertificate: provideCertificate !== undefined ? !!provideCertificate : false,
         certificateReleased: certificateReleased !== undefined ? !!certificateReleased : false,
-        certificateTemplateUrl
+        certificateTemplateUrl,
+        isExternal: isExternal !== undefined ? !!isExternal : false,
+        externalUrl,
+        externalProvider
       });
 
       res.status(201).json(newEvent);
