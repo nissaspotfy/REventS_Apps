@@ -1,4 +1,8 @@
 [phases.setup]
+nixPkgs = [
+  "...",
+  "chromium"
+]
 aptPkgs = [
   "...",
   "wget",
@@ -22,4 +26,5 @@ aptPkgs = [
   "libxrandr2",
   "libxshmfence1"
 ]
+
 

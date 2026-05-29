@@ -3,6 +3,24 @@ import { Event } from '../models/Event';
 import { Ticket } from '../models/Ticket';
 import html_to_pdf from 'html-pdf-node';
 import dns from 'dns';
+import { execSync } from 'child_process';
+
+function getChromiumPath(): string | undefined {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  try {
+    const path = execSync('which chromium || which chromium-browser', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    if (path) {
+      console.log(`[Events] Found system Chromium at: ${path}`);
+      return path;
+    }
+  } catch (e) {
+    // Ignore and fallback
+  }
+  return undefined;
+}
+
 import nodemailer from 'nodemailer';
 import path from 'path';
 import fs from 'fs';
@@ -314,7 +332,8 @@ REventS Team
           const options = { 
             format: 'A4', 
             landscape: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+            executablePath: getChromiumPath()
           };
           const file = { content: htmlPdfContent };
           

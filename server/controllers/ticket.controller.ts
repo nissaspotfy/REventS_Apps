@@ -2,6 +2,24 @@ import { Request, Response } from 'express';
 import { TicketService } from '../services/ticket.service';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import html_to_pdf from 'html-pdf-node';
+import { execSync } from 'child_process';
+
+function getChromiumPath(): string | undefined {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  try {
+    const path = execSync('which chromium || which chromium-browser', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    if (path) {
+      console.log(`[Invoice] Found system Chromium at: ${path}`);
+      return path;
+    }
+  } catch (e) {
+    // Ignore and fallback
+  }
+  return undefined;
+}
+
 
 export class TicketController {
   static async purchaseTicket(req: AuthenticatedRequest, res: Response) {
@@ -214,7 +232,8 @@ export class TicketController {
 
       const options = { 
         format: 'A4',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        executablePath: getChromiumPath()
       };
       const file = { content: htmlContent };
       
