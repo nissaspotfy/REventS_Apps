@@ -2226,7 +2226,6 @@ export default function App() {
                 }} className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black hover:scale-105 transition-transform overflow-hidden">
                    {profilePicUrl ? <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" /> : profileName ? profileName.substring(0, 2).toUpperCase() : 'U'}
                 </button>
-                <button onClick={handleSignOut} className="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2 ml-4 hover:text-red-600 dark:hover:text-red-400 transition-colors"><LogOut className="w-4 h-4" /> {t.signOut}</button>
               </div>
             ) : (
               view !== 'auth' && (
