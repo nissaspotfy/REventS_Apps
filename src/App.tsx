@@ -6251,57 +6251,93 @@ export default function App() {
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">View transaction history, download invoices, and track refund status.</p>
                     
                     <div className="space-y-6">
-                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
-                        <div>
-                          <h4 className="font-bold text-slate-900 dark:text-white">Tech Summit 2024</h4>
-                          <p className="text-xs text-slate-500 mt-1">Transaction ID: TXN-192837 • Nov 25, 2025</p>
+                      {userTickets.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                          No transaction or billing history found.
                         </div>
-                        <div className="flex flex-wrap gap-3 items-center">
-                          <span className="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg text-xs font-bold uppercase tracking-wider">Paid</span>
-                          <button onClick={async () => {
-                            setToast({ message: "Generating PDF Invoice...", show: true });
-                            try {
-                              const response = await fetch('/api/tickets/invoice/TXN-192837', {
-                                headers: {
-                                  'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-                                }
-                              });
-                              if (!response.ok) throw new Error('Failed to generate invoice.');
+                      ) : (
+                        userTickets.map(ticket => {
+                          const ev = ticket.event || events.find(e => e.id === ticket.eventId) || {
+                            title: 'Tech Summit 2024',
+                            location: 'Tech Hub, BSD City',
+                            date: 'Nov 25, 2025',
+                            price: 'IDR 250.000'
+                          };
+                          
+                          const txnId = ticket.qrCode 
+                            ? ticket.qrCode.replace('TKT-', 'TXN-') 
+                            : `TXN-${ticket.id}0${ticket.eventId}39`;
+                            
+                          const purchaseDate = ticket.purchaseDate 
+                            ? new Date(ticket.purchaseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                            : 'Nov 25, 2025';
+                            
+                          const isCancelled = ticket.status === 'cancelled' || ev.status === 'cancelled' || ticket.status === 'refunded';
 
-                              const blob = await response.blob();
-                              const downloadUrl = window.URL.createObjectURL(blob);
-                              const link = document.createElement('a');
-                              link.href = downloadUrl;
-                              link.download = 'Invoice_TXN-192837.pdf';
-                              document.body.appendChild(link);
-                              link.click();
-                              link.remove();
-                              window.URL.revokeObjectURL(downloadUrl);
+                          if (isCancelled) {
+                            return (
+                              <div key={ticket.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                <div>
+                                  <h4 className="font-bold text-slate-900 dark:text-white">{ev.title}</h4>
+                                  <p className="text-xs text-slate-500 mt-1">Transaction ID: {txnId} • {purchaseDate}</p>
+                                  <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-1">Event Cancelled - Refund Processing</p>
+                                </div>
+                                <div className="flex flex-wrap gap-3 items-center">
+                                  <span className="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 rounded-lg text-xs font-bold uppercase tracking-wider">Refund Pending</span>
+                                  <button onClick={() => {
+                                    setSelectedRefund({ 
+                                      event: ev.title, 
+                                      date: purchaseDate, 
+                                      amount: ticket.price || ev.price || 'IDR 250.000', 
+                                      transactionId: txnId 
+                                    });
+                                    setShowRefundModal(true);
+                                  }} className="px-4 py-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 font-bold rounded-xl text-xs hover:bg-indigo-100 transition-colors">View Refund Status</button>
+                                </div>
+                              </div>
+                            );
+                          }
 
-                              setToast({ message: 'Invoice downloaded successfully.', show: true });
-                              setTimeout(() => setToast({ message: '', show: false }), 3000);
-                            } catch (err: any) {
-                              setToast({ message: err.message || "Failed to download invoice.", show: true });
-                              setTimeout(() => setToast({ message: '', show: false }), 4000);
-                            }
-                          }} className="px-4 py-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 font-bold rounded-xl text-xs hover:bg-indigo-100 transition-colors">Download Invoice (PDF)</button>
-                        </div>
-                      </div>
+                          return (
+                            <div key={ticket.id} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                              <div>
+                                <h4 className="font-bold text-slate-900 dark:text-white">{ev.title}</h4>
+                                <p className="text-xs text-slate-500 mt-1">Transaction ID: {txnId} • {purchaseDate}</p>
+                              </div>
+                              <div className="flex flex-wrap gap-3 items-center">
+                                <span className="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400 rounded-lg text-xs font-bold uppercase tracking-wider">Paid</span>
+                                <button onClick={async () => {
+                                  setToast({ message: "Generating PDF Invoice...", show: true });
+                                  try {
+                                    const response = await fetch(`/api/tickets/invoice/${txnId}`, {
+                                      headers: {
+                                        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                                      }
+                                    });
+                                    if (!response.ok) throw new Error('Failed to generate invoice.');
 
-                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
-                        <div>
-                          <h4 className="font-bold text-slate-900 dark:text-white">Design Leadership Conference</h4>
-                          <p className="text-xs text-slate-500 mt-1">Transaction ID: TXN-028374 • Dec 02, 2025</p>
-                          <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-1">Event Cancelled - Refund Processing</p>
-                        </div>
-                        <div className="flex flex-wrap gap-3 items-center">
-                          <span className="px-3 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-lg text-xs font-bold uppercase tracking-wider">Refund Pending</span>
-                          <button onClick={() => {
-                            setSelectedRefund({ event: 'Design Leadership Conference', date: 'Dec 02, 2025', amount: 'IDR 500.000', transactionId: 'TXN-028374' });
-                            setShowRefundModal(true);
-                          }} className="px-4 py-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 font-bold rounded-xl text-xs hover:bg-indigo-100 transition-colors">View Refund Status</button>
-                        </div>
-                      </div>
+                                    const blob = await response.blob();
+                                    const downloadUrl = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = downloadUrl;
+                                    link.download = `Invoice_${txnId}.pdf`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                    window.URL.revokeObjectURL(downloadUrl);
+
+                                    setToast({ message: 'Invoice downloaded successfully.', show: true });
+                                    setTimeout(() => setToast({ message: '', show: false }), 3000);
+                                  } catch (err: any) {
+                                    setToast({ message: err.message || "Failed to download invoice.", show: true });
+                                    setTimeout(() => setToast({ message: '', show: false }), 4000);
+                                  }
+                                }} className="px-4 py-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 font-bold rounded-xl text-xs hover:bg-indigo-100 transition-colors">Download Invoice (PDF)</button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                   <div className="mt-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm p-8 sm:p-12">

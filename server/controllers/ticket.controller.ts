@@ -200,6 +200,39 @@ export class TicketController {
     try {
       const { transactionId } = req.params;
 
+      // Try fetching actual ticket details from database
+      const { Ticket } = await import('../models/Ticket');
+      const { Event } = await import('../models/Event');
+
+      // The transactionId is the qrCode with TXN- instead of TKT-
+      const qrCode = (transactionId || '').replace('TXN-', 'TKT-');
+      const ticket = await Ticket.findOne({
+        where: { qrCode },
+        include: [{ model: Event, as: 'event' }]
+      });
+
+      let eventTitle = 'Tech Summit 2024';
+      let dateString = 'November 25, 2025';
+      let amountString = 'IDR 250.000';
+      let paymentStatus = 'PAID';
+      let statusColor = '#10b981';
+      let buyerName = 'John Smith';
+      let buyerEmail = 'john@example.com';
+      let qty = 1;
+
+      if (ticket) {
+        const ev = (ticket as any).event || {};
+        eventTitle = ev.title || 'Unknown Event';
+        dateString = ticket.purchaseDate 
+          ? new Date(ticket.purchaseDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+          : 'November 25, 2025';
+        amountString = ticket.price || ev.price || 'IDR 250.000';
+        paymentStatus = (ticket.status as string) === 'cancelled' || (ticket.status as string) === 'refunded' ? 'REFUNDED' : 'PAID';
+        statusColor = paymentStatus === 'REFUNDED' ? '#d97706' : '#10b981';
+        buyerName = ticket.fullName || 'Guest';
+        buyerEmail = ticket.email || '-';
+      }
+
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -236,8 +269,8 @@ export class TicketController {
                 </td>
                 <td style="text-align: right;">
                   <strong>Invoice No:</strong> ${transactionId || 'TXN-192837'}<br>
-                  <strong>Date:</strong> November 25, 2025<br>
-                  <strong>Payment Status:</strong> <span style="color: #10b981; font-weight: bold;">PAID</span>
+                  <strong>Date:</strong> ${dateString}<br>
+                  <strong>Payment Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${paymentStatus}</span>
                 </td>
               </tr>
             </table>
@@ -253,15 +286,15 @@ export class TicketController {
               </thead>
               <tbody>
                 <tr>
-                  <td>Tech Summit 2024 (Standard Ticket)</td>
-                  <td style="text-align: center;">1</td>
-                  <td style="text-align: right;">IDR 250.000</td>
-                  <td style="text-align: right;">IDR 250.000</td>
+                  <td>${eventTitle} (Standard Ticket)</td>
+                  <td style="text-align: center;">${qty}</td>
+                  <td style="text-align: right;">${amountString}</td>
+                  <td style="text-align: right;">${amountString}</td>
                 </tr>
                 <tr class="total-row">
                   <td colspan="2"></td>
                   <td style="text-align: right;">Total Paid:</td>
-                  <td style="text-align: right; color: #6366f1;">IDR 250.000</td>
+                  <td style="text-align: right; color: #6366f1;">${amountString}</td>
                 </tr>
               </tbody>
             </table>
