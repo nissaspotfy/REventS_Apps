@@ -2234,99 +2234,75 @@ export default function App() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="lg:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-8 py-6 flex flex-col gap-4 overflow-hidden">
-            
-            {/* User Profile Header (Mobile Menu) */}
-            {isAuthenticated && (
-              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black overflow-hidden shadow-sm">
-                  {profilePicUrl ? <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" /> : profileName ? profileName.substring(0, 2).toUpperCase() : 'U'}
-                </div>
-                <div>
-                  <h4 className="text-sm font-black text-slate-800 dark:text-white leading-tight">{profileName || 'User'}</h4>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{role === 'organizer' ? t.organizerMode : t.audienceMode}</p>
-                </div>
-              </div>
-            )}
+            {isAuthenticated ? (
+              <>
+                {/* Clickable User Profile Header */}
+                <button 
+                  onClick={() => {
+                    setView('dashboard');
+                    if (role === 'organizer') {
+                      switchOrganizerTab('settings');
+                    } else {
+                      setAudienceTab('accountPayment');
+                    }
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 w-full text-left hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black overflow-hidden shadow-sm">
+                    {profilePicUrl ? <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" /> : profileName ? profileName.substring(0, 2).toUpperCase() : 'U'}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-800 dark:text-white leading-tight">{profileName || 'User'}</h4>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">{role === 'organizer' ? t.organizerMode : t.audienceMode}</p>
+                  </div>
+                </button>
 
-            {/* Mode Switcher */}
-            {isAuthenticated && (
-              <button 
-                onClick={() => { toggleRole(); setIsMobileMenuOpen(false); }}
-                className="w-full flex justify-center items-center gap-2 px-3 py-2.5 border border-indigo-100 dark:border-slate-800 bg-indigo-50/50 dark:bg-slate-800 rounded-xl text-xs font-black text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 transition-colors"
-              >
-                <ArrowLeftRight className="w-4 h-4" />
-                {role === 'organizer' ? 'Switch to Audience Mode' : 'Switch to Organizer Mode'}
-              </button>
-            )}
+                {/* Mode Switcher */}
+                <button 
+                  onClick={() => { toggleRole(); setIsMobileMenuOpen(false); }}
+                  className="w-full flex justify-center items-center gap-2 px-3 py-2.5 border border-indigo-100 dark:border-slate-800 bg-indigo-50/50 dark:bg-slate-800 rounded-xl text-xs font-black text-indigo-700 dark:text-indigo-400 hover:bg-indigo-50 transition-colors"
+                >
+                  <ArrowLeftRight className="w-4 h-4" />
+                  {role === 'organizer' ? 'Switch to Audience Mode' : 'Switch to Organizer Mode'}
+                </button>
 
-            {/* Navigation options depending on current view */}
-            {view === 'dashboard' ? (
-              // If on dashboard, show active role controls
-              role === 'organizer' ? (
-                <div className="flex flex-col gap-4 mt-2">
-                  <button onClick={() => { switchOrganizerTab('dashboard'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'dashboard' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.dashboard}</button>
-                  <button onClick={() => { switchOrganizerTab('aiEventCoPilot'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'aiEventCoPilot' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.aiEventCoPilot}</button>
-                  <button onClick={() => { switchOrganizerTab('myPublishedEvents'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'myPublishedEvents' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.myPublishedEvents}</button>
-                  <button onClick={() => { switchOrganizerTab('attendeesLogistics'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'attendeesLogistics' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.attendeesLogistics}</button>
-                  <button onClick={() => { switchOrganizerTab('communityImpact'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'communityImpact' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.communityImpact}</button>
-                  <button onClick={() => { switchOrganizerTab('finance'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'finance' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.finance}</button>
-                  <button onClick={() => { switchOrganizerTab('settings'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${organizerTab === 'settings' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.settings}</button>
-                  <button onClick={() => { setShowCreateForm(false); setView('create-event'); setIsMobileMenuOpen(false); clearCopilotState(); }} className="text-left font-bold text-sm text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg">{t.createEvent}</button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-4 mt-2">
-                  <button onClick={() => { setAudienceTab('myTickets'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${audienceTab === 'myTickets' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.myTickets}</button>
-                  <button onClick={() => { setShowSavedEventModal(true); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm text-slate-600 dark:text-slate-400`}>{t.savedEvents}</button>
-                  <button onClick={() => { setShowInterestModal(true); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm text-slate-600 dark:text-slate-400`}>{t.interestPreferences}</button>
-                  <button onClick={() => { setAudienceTab('accountPayment'); setIsMobileMenuOpen(false); }} className={`text-left font-bold text-sm ${audienceTab === 'accountPayment' ? 'text-indigo-600' : 'text-slate-600 dark:text-slate-400'}`}>{t.accountPayment}</button>
-                </div>
-              )
+                <hr className="border-slate-50 dark:border-slate-800" />
+
+                {/* Sign Out */}
+                <button 
+                  onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} 
+                  className="text-left font-bold text-sm text-red-500 flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" /> 
+                  {t.signOut}
+                </button>
+              </>
             ) : (
-              // If not on dashboard view
-              <div className="flex flex-col gap-4 mt-2">
-                {isAuthenticated ? (
-                  <>
-                    <button 
-                      onClick={() => { setView('dashboard'); setIsMobileMenuOpen(false); }} 
-                      className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm text-center shadow-lg shadow-indigo-100 dark:shadow-none transition-all active:scale-95"
-                    >
-                      <LayoutDashboard className="w-4 h-4" />
-                      {t.dashboard}
-                    </button>
-                    {role === 'organizer' && (
-                      <button onClick={() => { setShowCreateForm(false); setView('create-event'); setIsMobileMenuOpen(false); clearCopilotState(); }} className="text-left font-bold text-sm text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg">{t.createEvent}</button>
-                    )}
-                  </>
-                ) : (
-                  <button onClick={() => { 
-                     if (role !== 'organizer') setRole('organizer');
-                     setToast({ message: "To start creating events and using AI Drafter, please sign in first!", show: true });
-                     setTimeout(() => setToast({ message: '', show: false }), 4000);
-                     setView('auth');
-                     setAuthMode('login');
-                     setIsMobileMenuOpen(false);
-                  }} className="text-left font-bold text-sm text-slate-600 dark:text-slate-400">{t.createEvent}</button>
-                )}
-              </div>
-            )}
-            
-            <hr className="border-slate-50 dark:border-slate-800" />
+              <>
+                <button onClick={() => { 
+                   if (role !== 'organizer') setRole('organizer');
+                   setToast({ message: "To start creating events and using AI Drafter, please sign in first!", show: true });
+                   setTimeout(() => setToast({ message: '', show: false }), 4000);
+                   setView('auth');
+                   setAuthMode('login');
+                   setIsMobileMenuOpen(false);
+                }} className="text-left font-bold text-sm text-slate-600 dark:text-slate-400">{t.createEvent}</button>
 
-            <button onClick={() => {
-              setTimeout(() => {
-                setView('landing');
-                setTimeout(() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' }), 100);
-              }, 100);
-              setIsMobileMenuOpen(false);
-            }} className="text-left font-bold text-sm text-slate-600 dark:text-slate-400">
-              {t.helpCenter}
-            </button>
-            
-            {!isAuthenticated && view !== 'auth' && (
-              <button onClick={() => { setView('auth'); setAuthMode('login'); setIsMobileMenuOpen(false); }} className="bg-indigo-600 text-white p-3 rounded-xl font-bold text-center">{t.logIn}</button>
-            )}
-            {isAuthenticated && (
-               <button onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }} className="text-left font-bold text-sm text-red-500 flex items-center gap-2"><LogOut className="w-4 h-4" /> {t.signOut}</button>
+                <hr className="border-slate-50 dark:border-slate-800" />
+
+                <button onClick={() => {
+                  setTimeout(() => {
+                    setView('landing');
+                    setTimeout(() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                  }, 100);
+                  setIsMobileMenuOpen(false);
+                }} className="text-left font-bold text-sm text-slate-600 dark:text-slate-400">
+                  {t.helpCenter}
+                </button>
+                
+                <button onClick={() => { setView('auth'); setAuthMode('login'); setIsMobileMenuOpen(false); }} className="bg-indigo-600 text-white p-3 rounded-xl font-bold text-center">{t.logIn}</button>
+              </>
             )}
           </motion.div>
         )}
@@ -4170,22 +4146,31 @@ export default function App() {
 
   const DashboardView = () => (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors">
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-6 hidden lg:flex flex-col gap-6 transition-colors h-screen sticky top-0 overflow-y-auto no-scrollbar">
+      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 p-6 hidden lg:flex flex-col gap-6 transition-colors h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto no-scrollbar">
         <button onClick={() => setView('landing')} className="flex items-center text-2xl font-black text-indigo-600 tracking-tighter text-left ml-2 hover:opacity-90 transition-opacity">
           <span>REventS</span>
         </button>
         <div className="flex flex-col gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black flex-shrink-0 overflow-hidden">
+          <button 
+            onClick={() => {
+              if (role === 'organizer') {
+                switchOrganizerTab('settings');
+              } else {
+                setAudienceTab('accountPayment');
+              }
+            }}
+            className="flex items-center gap-3 w-full text-left hover:opacity-80 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black flex-shrink-0 overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
               {profilePicUrl ? <img src={profilePicUrl} alt="Profile" className="w-full h-full object-cover" /> : profileName ? profileName.substring(0, 2).toUpperCase() : 'U'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-black dark:text-white truncate">{profileName}</p>
+              <p className="text-sm font-black dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{profileName}</p>
               <p className="text-[10px] font-bold text-slate-400 uppercase truncate tracking-tighter">
                 {role === 'organizer' ? t.proOrganizer : t.audienceMode}
               </p>
             </div>
-          </div>
+          </button>
           <button 
             onClick={toggleRole} 
             className="w-full flex items-center justify-center gap-2 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-700 dark:text-white hover:border-indigo-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-sm"
@@ -5164,7 +5149,14 @@ export default function App() {
 
               {organizerTab === 'attendeesLogistics' && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                   <div className="mb-10 flex justify-between items-end flex-wrap gap-4">
+                  <button 
+                    onClick={() => switchOrganizerTab('dashboard')} 
+                    className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-600/30 shadow-sm transition-all hover:scale-102 active:scale-98"
+                  >
+                    <ArrowLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Back to Dashboard</span>
+                  </button>
+                  <div className="mb-10 flex justify-between items-end flex-wrap gap-4">
                     <div>
                       <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{t.attendeesLogistics}</h2>
                       <p className="text-slate-500 dark:text-slate-400 font-medium">Manage your attendee list, check-ins, and event operations.</p>
@@ -5302,6 +5294,13 @@ export default function App() {
 
               {organizerTab === 'communityImpact' && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                  <button 
+                    onClick={() => switchOrganizerTab('dashboard')} 
+                    className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-600/30 shadow-sm transition-all hover:scale-102 active:scale-98"
+                  >
+                    <ArrowLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Back to Dashboard</span>
+                  </button>
                   <div className="mb-10">
                     <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{t.communityImpact}</h2>
                     <p className="text-slate-500 dark:text-slate-400 font-medium">{t.commImpactDesc}</p>
@@ -5419,7 +5418,14 @@ export default function App() {
 
               {organizerTab === 'finance' && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                   <div className="mb-10">
+                  <button 
+                    onClick={() => switchOrganizerTab('dashboard')} 
+                    className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-black text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-600/30 shadow-sm transition-all hover:scale-102 active:scale-98"
+                  >
+                    <ArrowLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>Back to Dashboard</span>
+                  </button>
+                  <div className="mb-10">
                     <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{t.finance}</h2>
                     <p className="text-slate-500 dark:text-slate-400 font-medium">View revenue, manage payouts, and track transactions.</p>
                   </div>
@@ -6583,7 +6589,7 @@ export default function App() {
     </div>
   );
 
-  const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
+  const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout';
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
@@ -7070,7 +7076,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
-              className="fixed bottom-24 right-8 z-[100] w-[350px] max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
+              className="fixed bottom-24 right-4 left-4 sm:right-8 sm:left-auto z-[100] sm:w-[350px] max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col"
               style={{ maxHeight: 'calc(100vh - 8rem)' }}
             >
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 flex justify-between items-center text-white">
@@ -7136,7 +7142,7 @@ export default function App() {
           whileHover={{ scale: 1.05 }} 
           whileTap={{ scale: 0.95 }} 
           onClick={() => setIsChatOpen(!isChatOpen)} 
-          className="fixed bottom-8 right-8 z-[90] flex items-center shadow-2xl justify-center space-x-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white pr-6 pl-2 py-2 rounded-full text-sm font-bold"
+          className="hidden lg:flex fixed bottom-8 right-8 z-[90] items-center shadow-2xl justify-center space-x-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white pr-6 pl-2 py-2 rounded-full text-sm font-bold"
         >
           <div className="bg-white/20 p-2 rounded-full relative">
             <Bot className="w-6 h-6" />
@@ -7266,16 +7272,23 @@ export default function App() {
                 </button>
 
                 {/* Center Menonjol: REva'st Chatbot */}
-                <button
-                  onClick={() => {
-                    setIsChatOpen(!isChatOpen);
-                  }}
-                  className="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 -mt-7 rounded-full flex items-center justify-center shadow-lg shadow-purple-600/35 border-4 border-white dark:border-slate-900 transition-all hover:scale-105 active:scale-95 shrink-0 animate-pulse relative"
-                  title="REva'st AI Chatbot"
-                >
-                  <Bot className="w-7 h-7" />
-                  <Sparkles className="w-3.5 h-3.5 absolute top-1 right-1 text-yellow-300 animate-bounce" />
-                </button>
+                <div className="flex flex-col items-center justify-center shrink-0">
+                  <button
+                    onClick={() => {
+                      setIsChatOpen(!isChatOpen);
+                    }}
+                    className="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 -mt-7 rounded-full flex items-center justify-center shadow-lg shadow-purple-600/35 border-4 border-white dark:border-slate-900 transition-all hover:scale-105 active:scale-95 shrink-0 animate-pulse relative"
+                    title="REva'st AI Chatbot"
+                  >
+                    <Bot className="w-7 h-7" />
+                    <Sparkles className="w-3.5 h-3.5 absolute top-1 right-1 text-yellow-300 animate-bounce" />
+                  </button>
+                  {isChatOpen && (
+                    <span className="text-[10px] tracking-tight font-black text-indigo-600 dark:text-indigo-400 mt-1">
+                      REva'st
+                    </span>
+                  )}
+                </div>
 
                 {/* Right tab 1: Saved */}
                 <button
