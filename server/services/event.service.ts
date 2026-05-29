@@ -171,6 +171,7 @@ export class EventService {
 
     // Trigger background generation and sending
     (async () => {
+      const resendApiKey = process.env.RESEND_API_KEY;
       const smtpHost = process.env.SMTP_HOST;
       const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
       const smtpUser = process.env.SMTP_USER;
@@ -328,11 +329,56 @@ REventS Team
           console.error(`[Certificates] Failed to generate PDF for ticket ${ticket.id}:`, pdfErr);
         }
 
-        // Send Email
-        if (transporter && email) {
+        const sanitizedTitle = event.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30);
+
+        // Send Email via Resend HTTPS API (Port 443) or SMTP
+        if (resendApiKey && email) {
+          try {
+            console.log(`[Certificates] Attempting to send certificate email ${idx + 1}/${checkedInTickets.length} to ${email} via Resend HTTPS API...`);
+            const attachmentsPayload = pdfBuffer ? [
+              {
+                filename: `Certificate-${sanitizedTitle}.pdf`,
+                content: pdfBuffer.toString('base64')
+              }
+            ] : [];
+
+            const response = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: smtpFrom || 'REventS <onboarding@resend.dev>',
+                to: email,
+                subject: `E-Certificate for "${event.title}"`,
+                text: `Dear ${fullName},\n\nCongratulations on attending "${event.title}"!\nYour e-certificate has been successfully generated and is attached to this email.\n\nBest regards,\nREventS Team`,
+                html: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+                    <h2 style="color: #6366f1; text-align: center;">Congratulations!</h2>
+                    <p>Dear <strong>${fullName}</strong>,</p>
+                    <p>Thank you for attending <strong>"${event.title}"</strong>. Your e-certificate has been generated and is attached to this email.</p>
+                    <p>You can also download your certificate directly from your REventS tickets page.</p>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+                    <p style="text-align: center; color: #6b7280; font-size: 12px;">Sent by REventS Team</p>
+                  </div>
+                `,
+                attachments: attachmentsPayload
+              })
+            });
+
+            if (response.ok) {
+              console.log(`[Certificates] Email ${idx + 1}/${checkedInTickets.length} successfully sent to ${email} via Resend API.`);
+            } else {
+              const errData = await response.json();
+              console.error(`[Certificates] Resend API returned error for email ${idx + 1}/${checkedInTickets.length}:`, errData);
+            }
+          } catch (resendErr) {
+            console.error(`[Certificates] Failed to send email ${idx + 1}/${checkedInTickets.length} via Resend API:`, resendErr);
+          }
+        } else if (transporter && email) {
           try {
             console.log(`[Certificates] Sending certificate email ${idx + 1}/${checkedInTickets.length} to ${email} (async)...`);
-            const sanitizedTitle = event.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30);
             await transporter.sendMail({
               from: smtpFrom,
               to: email,
@@ -361,7 +407,7 @@ REventS Team
             console.error(`[Certificates] Failed to send email ${idx + 1}/${checkedInTickets.length} to ${email}:`, smtpErr);
           }
         } else {
-          console.log(`[Certificates] SMTP not configured. Simulated sending certificate to ${email}.`);
+          console.log(`[Certificates] No email provider configured (SMTP and Resend API keys are empty). Simulated sending certificate to ${email}.`);
         }
       }
     })().catch(err => {

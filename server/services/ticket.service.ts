@@ -114,6 +114,7 @@ export class TicketService {
 
     // Generate PDF Buffers and Send SMTP Emails asynchronously in the background (one email per ticket)
     (async () => {
+      const resendApiKey = process.env.RESEND_API_KEY;
       const smtpHost = process.env.SMTP_HOST;
       const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
       const smtpUser = process.env.SMTP_USER;
@@ -398,11 +399,47 @@ REventS Team
           console.error(`Failed to generate PDF for ticket ${tCode}:`, pdfErr);
         }
 
-        // Send SMTP Email for this specific ticket
-        if (transporter) {
+        const sanitizedTitle = event.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30);
+
+        // Send Email via Resend HTTPS API (Port 443) or SMTP
+        if (resendApiKey) {
           try {
-            console.log(`Attempting to send ticket email ${idx + 1}/${tickets.length} to ${email} (async)...`);
-            const sanitizedTitle = event.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30);
+            console.log(`Attempting to send ticket email ${idx + 1}/${tickets.length} to ${email} via Resend HTTPS API...`);
+            const attachmentsPayload = pdfBuffer ? [
+              {
+                filename: `Ticket-${sanitizedTitle}-${idx + 1}.pdf`,
+                content: pdfBuffer.toString('base64')
+              }
+            ] : [];
+
+            const response = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                from: smtpFrom || 'REventS <onboarding@resend.dev>',
+                to: email,
+                subject: `Your Ticket Confirmation [${idx + 1}/${tickets.length}] for "${event.title}"`,
+                text: mockEmailContentForTicket.replace(/={72}/g, '').trim(),
+                html: htmlEmailContentForTicket,
+                attachments: attachmentsPayload
+              })
+            });
+
+            if (response.ok) {
+              console.log(`Email ${idx + 1}/${tickets.length} successfully sent to ${email} via Resend API.`);
+            } else {
+              const errData = await response.json();
+              console.error(`Resend API returned error for email ${idx + 1}/${tickets.length}:`, errData);
+            }
+          } catch (resendErr) {
+            console.error(`Failed to send email ${idx + 1}/${tickets.length} via Resend API:`, resendErr);
+          }
+        } else if (transporter) {
+          try {
+            console.log(`Attempting to send ticket email ${idx + 1}/${tickets.length} to ${email} via SMTP (async)...`);
             await transporter.sendMail({
               from: smtpFrom,
               to: email,
@@ -422,7 +459,7 @@ REventS Team
             console.error(`Failed to send email ${idx + 1}/${tickets.length} via SMTP:`, smtpErr);
           }
         } else {
-          console.log(`SMTP is not configured. Simulated sending email ${idx + 1}/${tickets.length} to ${email}.`);
+          console.log(`No email provider configured (SMTP and Resend API keys are empty). Simulated sending email ${idx + 1}/${tickets.length} to ${email}.`);
         }
       }
     })().catch(err => {
