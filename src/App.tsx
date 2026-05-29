@@ -48,7 +48,7 @@ import { Search,
   Shield,
   Globe,
   QrCode,
-  Camera, Link2,
+  Camera, Link2, Share2, Twitter,
   Edit2,
   BarChart3,
   PlusCircle,
@@ -452,6 +452,16 @@ export default function App() {
 
   const [events, setEvents] = useState<Event[]>([]);
   const [userTickets, setUserTickets] = useState<any[]>([]);
+  const [selectedScrapbookTicket, setSelectedScrapbookTicket] = useState<any>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [showInstagramSharePreview, setShowInstagramSharePreview] = useState(false);
+
+  const isScrapbookCategory = (category?: string) => {
+    if (!category) return false;
+    const cat = category.toLowerCase();
+    return cat.includes('music') || cat.includes('food') || cat.includes('culture') || cat.includes('art') || cat.includes('entertainment');
+  };
+
   const [currentUser, setCurrentUser] = useState<any>(null);
   const teamMembers = currentUser?.preferences?.teamMembers || [];
   const [copilotResultObj, setCopilotResultObj] = useState<any>(null);
@@ -5872,15 +5882,53 @@ export default function App() {
                             const ev = events.find(e => e.id === ticket.eventId) || {
                               title: 'Street Food Carnival',
                               location: 'Kota Tua, Jakarta',
-                              image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'
+                              image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+                              category: 'Food & Drink'
                             };
+                            const isScrapbook = isScrapbookCategory(ev.category);
+
+                            if (isScrapbook) {
+                              return (
+                                <div key={ticket.id} className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/40 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-indigo-500/5 dark:from-purple-950/10 dark:via-pink-950/10 dark:to-indigo-950/10 transition-all border-b border-slate-100 dark:border-slate-800">
+                                  <div className="flex items-center gap-5">
+                                    <div className="w-16 h-16 bg-white dark:bg-slate-800 p-1 rounded-sm shadow-md transform rotate-[-2deg] hover:rotate-0 transition-transform duration-300 flex-shrink-0 border border-slate-200/50 dark:border-slate-700/50">
+                                      <img src={ev.image} className="w-full h-full object-cover rounded-sm" alt={ev.title} />
+                                    </div>
+                                    <div>
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 mb-1.5 border border-purple-200/30">
+                                        📸 Memory Scrapbook
+                                      </span>
+                                      <h4 className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-snug">{ev.title}</h4>
+                                      <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1 font-medium">
+                                        <MapPin className="w-3 h-3 text-purple-400" /> {ev.location}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3 self-end sm:self-auto">
+                                    <span className="text-xs font-bold text-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 px-3 py-1 rounded-lg border border-indigo-100/50 dark:border-indigo-900/30">
+                                      Attended
+                                    </span>
+                                    <button 
+                                      onClick={() => setSelectedScrapbookTicket({ ticket, ev })}
+                                      className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-xs font-black transition-all active:scale-[0.97] hover:scale-[1.03] shadow-md shadow-purple-200/50 dark:shadow-none cursor-pointer"
+                                    >
+                                      <Sparkles className="w-3.5 h-3.5" /> Buka Scrapbook
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            // Non-scrapbook categories (Tech, Sports, etc.)
                             return (
                               <div key={ticket.id} className="p-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                                 <div className="flex items-center gap-4">
-                                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden"><img src={ev.image} className="w-full h-full object-cover grayscale opacity-70" /></div>
+                                  <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    <img src={ev.image} className="w-full h-full object-cover grayscale opacity-70" alt={ev.title} />
+                                  </div>
                                   <div>
                                     <h4 className="font-bold text-slate-900 dark:text-white">{ev.title}</h4>
-                                    <p className="text-xs text-slate-400">Past • {ev.location}</p>
+                                    <p className="text-xs text-slate-400 font-medium">Past • {ev.location}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -6274,7 +6322,7 @@ export default function App() {
                       </div>
 
                       {/* Switch Mode Card */}
-                      <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <div className="flex lg:hidden items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <div>
                           <h4 className="font-bold text-slate-900 dark:text-white">Switch Mode</h4>
                           <p className="text-xs text-slate-500 mt-1">Switch to Pro Organizer Mode to create and manage events.</p>
@@ -6286,7 +6334,7 @@ export default function App() {
                       </div>
 
                       {/* Interest Preferences Card */}
-                      <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+                      <div className="flex lg:hidden items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <div>
                           <h4 className="font-bold text-slate-900 dark:text-white">Interest Preferences</h4>
                           <p className="text-xs text-slate-500 mt-1">Update preferences to help AI find the best events.</p>
@@ -6298,7 +6346,7 @@ export default function App() {
                       </div>
 
                       {/* Sign Out Card */}
-                      <div className="flex items-center justify-between p-6 bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/30">
+                      <div className="flex lg:hidden items-center justify-between p-6 bg-red-50 dark:bg-red-950/10 rounded-2xl border border-red-100 dark:border-red-900/30">
                         <div>
                           <h4 className="font-bold text-red-650 dark:text-red-400">Sign Out</h4>
                           <p className="text-xs text-red-500 dark:text-red-350 mt-1">Log out of the current REventS session.</p>
@@ -7040,6 +7088,254 @@ export default function App() {
               </motion.div>
             </motion.div>
           )}
+        </AnimatePresence>
+
+        {/* Digital Scrapbook Memory Modal */}
+        <AnimatePresence>
+          {selectedScrapbookTicket && (() => {
+            const { ticket, ev } = selectedScrapbookTicket;
+            const getScrapbookQuote = (category: string, title: string) => {
+              const cat = category.toLowerCase();
+              if (cat.includes('music')) {
+                return `Dancing under the stage lights, singing every word, and feeling the bass in our chest. ${title} was an absolute dream. 🎸✨`;
+              } else if (cat.includes('food')) {
+                return `Tasting every flavor, laughing with friends, and satisfying our inner foodie. ${title} was a delicious journey! 🍔🍕`;
+              } else if (cat.includes('culture') || cat.includes('art')) {
+                return `Immersed in beauty, expression, and story. ${title} connected us to the heart of art and heritage. 🏛️🎨`;
+              } else {
+                return `Good vibes, great company, and memories that will last a lifetime. Thank you, ${title}! 🌟`;
+              }
+            };
+
+            const getCategoryBadge = (category: string) => {
+              const cat = category.toLowerCase();
+              if (cat.includes('music')) return { label: 'Music Fanatic 🎵', bg: 'from-pink-500 to-rose-500 text-white' };
+              if (cat.includes('food')) return { label: 'Foodie Gold 🍔', bg: 'from-amber-400 to-orange-500 text-amber-950 font-black' };
+              if (cat.includes('culture') || cat.includes('art')) return { label: 'VIP Culture 🏛️', bg: 'from-indigo-500 to-purple-600 text-white' };
+              return { label: 'Special Guest ✨', bg: 'from-teal-400 to-emerald-500 text-white' };
+            };
+
+            const badge = getCategoryBadge(ev.category || '');
+            const quote = getScrapbookQuote(ev.category || '', ev.title);
+
+            return (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }} 
+                className="fixed inset-0 bg-slate-950/80 z-[150] flex items-center justify-center p-4 backdrop-blur-md overflow-y-auto no-scrollbar"
+              >
+                <motion.div 
+                  initial={{ scale: 0.9, y: 30 }} 
+                  animate={{ scale: 1, y: 0 }} 
+                  exit={{ scale: 0.9, y: 30 }} 
+                  className="bg-slate-900/90 dark:bg-slate-950/95 border border-purple-500/20 text-white w-full max-w-md rounded-[2.5rem] shadow-[0_0_50px_rgba(168,85,247,0.25)] overflow-hidden flex flex-col relative my-auto"
+                >
+                  {/* Close button */}
+                  <button 
+                    onClick={() => {
+                      setSelectedScrapbookTicket(null);
+                      setShowInstagramSharePreview(false);
+                    }} 
+                    className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all z-10 hover:scale-105 active:scale-95"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  {/* Decorative glowing backdrops */}
+                  <div className="absolute top-[-50px] left-[-50px] w-48 h-48 bg-purple-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+                  <div className="absolute bottom-[-50px] right-[-50px] w-48 h-48 bg-indigo-500/20 rounded-full blur-[60px] pointer-events-none"></div>
+
+                  <div className="p-6 pb-2 relative z-10">
+                    <h3 className="text-2xl font-black text-center bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent mt-4 tracking-tight">
+                      Koleksi Kenangan Anda
+                    </h3>
+                    <p className="text-center text-[10px] text-purple-400 font-extrabold uppercase tracking-widest mb-6">
+                      ✨ REventS Memory Lane ✨
+                    </p>
+
+                    {/* Polaroid Frame */}
+                    <div className="relative mx-auto max-w-[280px] mb-6">
+                      {/* Polaroid Tape Effect */}
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-7 bg-white/20 dark:bg-slate-800/40 backdrop-blur-[2px] shadow-sm transform -rotate-1 border border-white/10 pointer-events-none z-10"></div>
+                      
+                      <div className="bg-white text-slate-800 p-4 pb-6 shadow-2xl rounded-sm transform rotate-[-1.5deg] border border-slate-100/50 flex flex-col relative overflow-visible">
+                        {/* Memory circular badge stamp */}
+                        <div className={`absolute -bottom-3 -right-3 w-16 h-16 rounded-full bg-gradient-to-tr ${badge.bg} text-[8px] font-black flex items-center justify-center text-center uppercase tracking-wider transform rotate-12 shadow-lg border border-white dark:border-slate-800 z-10 p-1`}>
+                          {badge.label}
+                        </div>
+
+                        {/* Image */}
+                        <div className="w-full h-48 overflow-hidden bg-slate-100 rounded-sm border border-slate-200/50 mb-4">
+                          <img src={ev.image} className="w-full h-full object-cover" alt={ev.title} />
+                        </div>
+
+                        {/* Handwritten Details */}
+                        <div className="text-center font-['Caveat',_cursive] text-slate-800 space-y-1">
+                          <h4 className="text-2xl font-bold leading-tight select-all">{ev.title}</h4>
+                          <p className="text-lg text-slate-500 font-medium tracking-tight">
+                            {ev.date || 'Past Event'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Personalized Quote card */}
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-2xl max-w-sm mx-auto text-center mb-6">
+                      <p className="text-xs text-slate-300 italic leading-relaxed font-medium">
+                        "{quote}"
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Social Share Drawer */}
+                  <div className="border-t border-white/10 pt-5 px-6 pb-6 bg-slate-950/40 rounded-b-[2.5rem] mt-auto relative z-10">
+                    <h4 className="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">
+                      Bagikan Ke Media Sosial
+                    </h4>
+                    
+                    <div className="grid grid-cols-4 gap-3">
+                      {/* Instagram */}
+                      <button 
+                        onClick={() => setShowInstagramSharePreview(true)}
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 border border-white/5 transition-all text-white group cursor-pointer"
+                      >
+                        <div className="p-2.5 bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 rounded-xl group-hover:scale-110 transition-transform">
+                          <Instagram className="w-5 h-5 text-white" />
+                        </div>
+                        <span className="text-[10px] font-bold">Instagram</span>
+                      </button>
+
+                      {/* Twitter/X */}
+                      <a 
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Look at my Memory Scrapbook from ${ev.title}! Saved forever on @REventS. ✨\n\n`)}&url=${encodeURIComponent(`https://revents.io/memory/${ticket.qrCode}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 border border-white/5 transition-all text-white group cursor-pointer text-center"
+                      >
+                        <div className="p-2.5 bg-slate-800 text-white rounded-xl group-hover:scale-110 transition-transform flex items-center justify-center">
+                          <Twitter className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-bold">Twitter</span>
+                      </a>
+
+                      {/* Facebook */}
+                      <a 
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://revents.io/memory/${ticket.qrCode}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 border border-white/5 transition-all text-white group cursor-pointer text-center"
+                      >
+                        <div className="p-2.5 bg-indigo-600 text-white rounded-xl group-hover:scale-110 transition-transform flex items-center justify-center">
+                          <Facebook className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-bold">Facebook</span>
+                      </a>
+
+                      {/* Copy Link */}
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(`https://revents.io/memory/${ticket.qrCode}`);
+                          setToast({ message: "Link memory disalin ke clipboard! 📋", show: true });
+                          setTimeout(() => setToast({ message: '', show: false }), 3000);
+                        }}
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-indigo-600/20 hover:border-indigo-500/50 border border-white/5 transition-all text-white group cursor-pointer"
+                      >
+                        <div className="p-2.5 bg-emerald-600 text-white rounded-xl group-hover:scale-110 transition-transform flex items-center justify-center">
+                          <Link2 className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-bold">Salin Link</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Simulated Instagram Stories Sharing Preview Overlay */}
+                <AnimatePresence>
+                  {showInstagramSharePreview && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="absolute inset-0 bg-slate-950/95 z-[160] flex flex-col items-center justify-center p-4"
+                    >
+                      {/* Instagram Device Frame */}
+                      <div className="w-[310px] h-[550px] bg-gradient-to-tr from-purple-800 via-pink-700 to-orange-600 rounded-[3rem] border-8 border-slate-800 shadow-2xl relative overflow-hidden flex flex-col items-center justify-between p-6">
+                        {/* Notch / Dynamic Island */}
+                        <div className="w-24 h-4 bg-slate-800 rounded-full absolute top-2 left-1/2 -translate-x-1/2"></div>
+                        
+                        {/* Story Progress Bar */}
+                        <div className="flex gap-1 w-full px-2 mt-4 absolute top-4 left-0">
+                          <div className="h-1 bg-white/80 rounded-full flex-1"></div>
+                          <div className="h-1 bg-white/30 rounded-full flex-1"></div>
+                        </div>
+
+                        {/* Story Header (Profile Mockup) */}
+                        <div className="flex items-center gap-2 mt-4 self-start w-full px-2">
+                          <div className="w-8 h-8 rounded-full bg-slate-200 border-2 border-pink-500 overflow-hidden">
+                            <img src={currentUser?.profilePicUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-[10px] font-bold text-white tracking-wide shadow-sm">
+                            {currentUser?.fullName?.toLowerCase().replace(/\s+/g, '_') || 'my_revents_memory'}
+                          </span>
+                          <span className="text-[9px] text-white/60">3h</span>
+                        </div>
+
+                        {/* Centered Polaroid Content */}
+                        <div className="my-auto flex flex-col items-center">
+                          <div className="bg-white text-slate-800 p-4 pb-6 shadow-2xl rounded-sm transform rotate-[1deg] border border-slate-100/50 flex flex-col relative w-[220px]">
+                            {/* Stamp sticker inside instagram story */}
+                            <div className={`absolute -bottom-2 -right-2 w-12 h-12 rounded-full bg-gradient-to-tr ${badge.bg} text-[6px] font-black flex items-center justify-center text-center uppercase tracking-wider transform rotate-12 shadow-lg border border-white z-10 p-0.5`}>
+                              {badge.label}
+                            </div>
+                            <div className="w-full h-36 overflow-hidden bg-slate-100 rounded-sm border border-slate-200/50 mb-3">
+                              <img src={ev.image} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="text-center font-['Caveat',_cursive] text-slate-800 space-y-0.5">
+                              <h4 className="text-lg font-bold leading-tight">{ev.title}</h4>
+                              <p className="text-sm text-slate-500 font-medium">{ev.date}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Simulated Sticker Badge */}
+                          <div className="mt-6 px-4 py-2 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 text-white text-[10px] font-bold tracking-wide shadow-md flex items-center gap-1.5 transform -rotate-2">
+                            <Sparkles className="w-3.5 h-3.5 text-yellow-300" /> Tap to view on REventS
+                          </div>
+                        </div>
+
+                        {/* Story Footer Input */}
+                        <div className="w-full flex items-center gap-3 px-2 mb-2">
+                          <div className="flex-1 bg-transparent border border-white/40 rounded-full px-4 py-2 text-[10px] text-white/70">
+                            Send message...
+                          </div>
+                          <Send className="w-4 h-4 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Instagram Share Modal Actions */}
+                      <div className="flex gap-4 mt-6">
+                        <button 
+                          onClick={() => {
+                            setToast({ message: "Foto memory berhasil diunduh ke galeri! 💾", show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 3000);
+                          }}
+                          className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-xs font-black shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Unduh Story 📸
+                        </button>
+                        <button 
+                          onClick={() => setShowInstagramSharePreview(false)}
+                          className="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-xs font-black hover:bg-slate-700 active:scale-95 transition-all cursor-pointer"
+                        >
+                          Kembali
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })()}
         </AnimatePresence>
 
         {/* Checkout Modal Flow */}
