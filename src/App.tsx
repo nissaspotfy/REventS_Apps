@@ -320,6 +320,8 @@ export default function App() {
   const [managingSubView, setManagingSubView] = useState('overview');
   const [audienceTab, setAudienceTab] = useState('exploreEvents');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [myTicketsTab, setMyTicketsTab] = useState('active');
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showSavedEventModal, setShowSavedEventModal] = useState(false);
@@ -1535,6 +1537,91 @@ export default function App() {
     }
   }, []);
 
+  // Load mock notifications based on authentication and active role
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      setNotifications([]);
+      return;
+    }
+
+    if (role === 'organizer') {
+      setNotifications([
+        {
+          id: 1,
+          title: "Tiket Terjual! 🎟️",
+          desc: "1 tiket General Access baru saja terjual untuk Summer Music Festival 2024.",
+          time: "Baru saja",
+          read: false,
+          type: "sales"
+        },
+        {
+          id: 2,
+          title: "Rev Co-pilot Selesai 🤖",
+          desc: "Bantuan draf proposal acara Anda 'Future of AI Workshop' siap digunakan.",
+          time: "5m yang lalu",
+          read: false,
+          type: "ai"
+        },
+        {
+          id: 3,
+          title: "Peringatan Sistem ⚠️",
+          desc: "Draf acara 'Street Food Carnival' belum dipublikasikan selama 3 hari.",
+          time: "2j yang lalu",
+          read: true,
+          type: "warning"
+        },
+        {
+          id: 4,
+          title: "Kuota Tiket Menipis 🚨",
+          desc: "Kuota tiket untuk Summer Music Festival 2024 tersisa 10%!",
+          time: "1h yang lalu",
+          read: true,
+          type: "warning"
+        }
+      ]);
+    } else {
+      setNotifications([
+        {
+          id: 5,
+          title: "Reminder Acara 📅",
+          desc: "Summer Music Festival 2024 dimulai besok pukul 10:00 WIB. Siapkan QR code tiket Anda.",
+          time: "H-1 Acara",
+          read: false,
+          type: "reminder"
+        },
+        {
+          id: 6,
+          title: "Sertifikat Tersedia 🏆",
+          desc: "Sertifikat kehadiran untuk Future of AI Workshop sudah terbit. Unduh sekarang!",
+          time: "3j yang lalu",
+          read: false,
+          type: "certificate"
+        },
+        {
+          id: 7,
+          title: "Rekomendasi AI Baru ✨",
+          desc: "REvas'st menyarankan 'Startup Networking Night' sesuai minat teknologi Anda.",
+          time: "1h yang lalu",
+          read: true,
+          type: "recommendation"
+        }
+      ]);
+    }
+  }, [role, isAuthenticated]);
+
+  // Handle outside clicks to close the notification dropdown
+  React.useEffect(() => {
+    if (!showNotificationDropdown) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.notification-bell-container')) {
+        setShowNotificationDropdown(false);
+      }
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, [showNotificationDropdown]);
+
   // Reset active editing states on navigation/tab switches
   React.useEffect(() => {
     if (view !== 'create-event') {
@@ -2044,6 +2131,82 @@ export default function App() {
             </nav>
 
             <button onClick={toggleTheme} className="p-2 text-slate-500 hover:text-indigo-600 transition-colors">{theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}</button>
+
+            {isAuthenticated && (
+              <div className="relative notification-bell-container">
+                <button 
+                  onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                  className="p-2 text-slate-500 hover:text-indigo-600 transition-colors relative focus:outline-none cursor-pointer"
+                >
+                  <Bell className="w-5 h-5" />
+                  {notifications.some(n => !n.read) && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+                  )}
+                </button>
+
+                {/* Dropdown Menu */}
+                <AnimatePresence>
+                  {showNotificationDropdown && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden"
+                    >
+                      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
+                        <h4 className="font-black text-sm text-slate-950 dark:text-white">Pemberitahuan</h4>
+                        {notifications.some(n => !n.read) && (
+                          <button 
+                            onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                          >
+                            Tandai semua dibaca
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-72 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800/50 no-scrollbar">
+                        {notifications.length === 0 ? (
+                          <div className="p-6 text-center text-slate-400 dark:text-slate-500 text-xs">
+                            Tidak ada pemberitahuan baru.
+                          </div>
+                        ) : (
+                          notifications.map(n => (
+                            <div 
+                              key={n.id} 
+                              onClick={() => {
+                                setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
+                                if (role === 'organizer') {
+                                  if (n.type === 'ai') switchOrganizerTab('aiEventCoPilot');
+                                  else if (n.type === 'sales') switchOrganizerTab('finance');
+                                  else switchOrganizerTab('myPublishedEvents');
+                                } else {
+                                  if (n.type === 'certificate') setAudienceTab('myTickets');
+                                  else if (n.type === 'recommendation') setAudienceTab('revasst');
+                                  else setAudienceTab('myTickets');
+                                }
+                                setShowNotificationDropdown(false);
+                              }}
+                              className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer flex gap-3 text-left ${!n.read ? 'bg-indigo-50/20 dark:bg-indigo-950/10' : ''}`}
+                            >
+                              <div className="flex-grow">
+                                <div className="flex justify-between items-start gap-2">
+                                  <h5 className={`text-xs font-bold leading-snug ${!n.read ? 'text-slate-950 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
+                                    {n.title}
+                                  </h5>
+                                  <span className="text-[9px] text-slate-400 shrink-0 font-medium">{n.time}</span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal font-medium">{n.desc}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {isAuthenticated ? (
               <div className="hidden sm:flex items-center gap-3 ml-2 border-l border-slate-200 dark:border-slate-800 pl-6">
