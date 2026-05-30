@@ -2000,7 +2000,9 @@ export default function App() {
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
       const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (event.description && event.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                            (event.location && event.location.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesLocation = event.location.toLowerCase().includes(locationQuery.toLowerCase());
       return matchesCategory && matchesSearch && matchesLocation;
     });
@@ -2379,7 +2381,7 @@ export default function App() {
     <div className="bg-white dark:bg-slate-950 transition-colors min-h-screen">
       <section className="px-8 py-8 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-4 mb-4">
+          <div className="flex flex-col lg:flex-row gap-4 mb-8">
             <div className="relative flex-grow">
               <span className="absolute inset-y-0 left-4 flex items-center text-slate-400"><Search className="w-5 h-5" /></span>
               <input type="text" placeholder={t.searchPlaceholder} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium dark:text-white" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -2388,29 +2390,6 @@ export default function App() {
               <span className="absolute inset-y-0 left-4 flex items-center text-slate-400"><MapPin className="w-5 h-5" /></span>
               <input type="text" placeholder={t.locationPlaceholder} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium dark:text-white" value={locationQuery} onChange={(e) => setLocationQuery(e.target.value)} />
             </div>
-          </div>
-
-          {/* Quick Location Pills */}
-          <div className="flex items-center gap-2 mb-8 flex-wrap">
-            <span className="text-xs font-black text-slate-400 dark:text-slate-500 mr-2 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5" /> {lang === 'id' ? 'Wilayah Populer:' : 'Popular Locations:'}
-            </span>
-            {[
-              { name: lang === 'id' ? 'Semua Wilayah' : 'All Regions', query: '' },
-              { name: lang === 'id' ? 'Indonesia (Global)' : 'Indonesia (Global)', query: 'Indonesia' },
-              { name: 'Jakarta', query: 'Jakarta' },
-              { name: 'Bali', query: 'Bali' },
-              { name: 'Bandung', query: 'Bandung' },
-              { name: 'Yogyakarta', query: 'Yogyakarta' }
-            ].map(loc => (
-              <button 
-                key={loc.name}
-                onClick={() => setLocationQuery(loc.query)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${locationQuery.toLowerCase() === loc.query.toLowerCase() ? 'bg-indigo-650 border-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none font-extrabold' : 'bg-white dark:bg-slate-800 text-slate-650 dark:text-slate-400 border-slate-200 dark:border-slate-750 hover:bg-slate-50 dark:hover:bg-slate-700 hover:scale-105 active:scale-95'}`}
-              >
-                {loc.name}
-              </button>
-            ))}
           </div>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex space-x-4 overflow-x-auto pb-2 no-scrollbar">

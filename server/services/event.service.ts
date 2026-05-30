@@ -79,7 +79,8 @@ export class EventService {
     if (filters.search) {
       where[Op.or] = [
         { title: { [Op.like]: `%${filters.search}%` } },
-        { description: { [Op.like]: `%${filters.search}%` } }
+        { description: { [Op.like]: `%${filters.search}%` } },
+        { location: { [Op.like]: `%${filters.search}%` } }
       ];
     }
 
