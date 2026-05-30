@@ -202,7 +202,7 @@ export async function seedDatabase() {
           views: 120,
           checkins: 0,
           status: 'active',
-          isExternal: true,
+          isExternal: false,
           externalUrl: "https://www.javajazzfestival.com",
           externalProvider: "Loket.com"
         },
@@ -226,7 +226,7 @@ export async function seedDatabase() {
           views: 85,
           checkins: 0,
           status: 'active',
-          isExternal: true,
+          isExternal: false,
           externalUrl: "https://www.klook.com/en-ID/activity/99999-bali-cultural-arts-festival/",
           externalProvider: "Klook"
         },
@@ -250,7 +250,7 @@ export async function seedDatabase() {
           views: 240,
           checkins: 0,
           status: 'active',
-          isExternal: true,
+          isExternal: false,
           externalUrl: "https://www.eventbrite.com/e/indonesia-tech-summit-2026-tickets-987654321",
           externalProvider: "Eventbrite"
         }
@@ -282,7 +282,7 @@ export async function seedDatabase() {
         views: 120,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.javajazzfestival.com",
         externalProvider: "Loket.com"
       },
@@ -306,7 +306,7 @@ export async function seedDatabase() {
         views: 85,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.klook.com/en-ID/activity/99999-bali-cultural-arts-festival/",
         externalProvider: "Klook"
       },
@@ -330,7 +330,7 @@ export async function seedDatabase() {
         views: 240,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.eventbrite.com/e/indonesia-tech-summit-2026-tickets-987654321",
         externalProvider: "Eventbrite"
       },
@@ -354,7 +354,7 @@ export async function seedDatabase() {
         views: 95,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.loket.com/event/medan-music-food-2026",
         externalProvider: "Loket.com"
       },
@@ -378,7 +378,7 @@ export async function seedDatabase() {
         views: 110,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.loket.com/event/surabaya-tech-summit-2026",
         externalProvider: "Loket.com"
       },
@@ -402,7 +402,7 @@ export async function seedDatabase() {
         views: 145,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.klook.com/en-ID/activity/12345-yogyakarta-heritage-walk/",
         externalProvider: "Klook"
       },
@@ -426,7 +426,7 @@ export async function seedDatabase() {
         views: 130,
         checkins: 0,
         status: 'active',
-        isExternal: true,
+        isExternal: false,
         externalUrl: "https://www.eventbrite.com/e/bandung-art-design-expo-2026-tickets-11223344",
         externalProvider: "Eventbrite"
       }
