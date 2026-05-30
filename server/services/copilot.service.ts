@@ -76,8 +76,10 @@ Return a valid JSON object matching the EXACT structure below (do not include ma
  
       const responseText = response.text || '';
       
-      // Attempt to parse JSON
-      return JSON.parse(responseText);
+      // Attempt to parse JSON and inject theme-based custom image URL
+      const draftObj = JSON.parse(responseText);
+      draftObj.image = this.getUnsplashImageForConcept(draftObj.category, draftObj.theme, draftObj.title);
+      return draftObj;
     } catch (err: any) {
       console.error('Error generating draft from Gemini API:', err);
       if (err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('quota')) {
@@ -91,12 +93,62 @@ Return a valid JSON object matching the EXACT structure below (do not include ma
           location: "API Error",
           theme: "Quota Exceeded",
           price: "0",
-          capacity: 0
+          capacity: 0,
+          image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80"
         };
       }
       // Fallback on other failure
       return this.getMockResponse(userPrompt, existingTitles);
     }
+  }
+
+  private static getUnsplashImageForConcept(category: string, theme: string, title: string): string {
+    const cleanCategory = (category || '').toLowerCase();
+    const cleanTheme = (theme || '').toLowerCase();
+    const cleanTitle = (title || '').toLowerCase();
+
+    // Food & Drink keywords
+    if (cleanCategory.includes('food') || cleanCategory.includes('drink') || cleanCategory.includes('kuliner') || cleanCategory.includes('makan') || cleanTitle.includes('coffee') || cleanTheme.includes('coffee') || cleanTitle.includes('kopi')) {
+      if (cleanTitle.includes('coffee') || cleanTheme.includes('coffee') || cleanTitle.includes('kopi') || cleanTitle.includes('barista')) {
+        return 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80'; // Coffee masterclass
+      }
+      return 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'; // Street food
+    }
+
+    // Music keywords
+    if (cleanCategory.includes('music') || cleanCategory.includes('musik') || cleanCategory.includes('concert') || cleanTitle.includes('jazz') || cleanTheme.includes('jazz') || cleanTitle.includes('konser') || cleanTitle.includes('band')) {
+      if (cleanTitle.includes('jazz') || cleanTheme.includes('jazz')) {
+        return 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80'; // Jazz under the stars
+      }
+      return 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=800&q=80'; // Summer music festival
+    }
+
+    // Tech keywords
+    if (cleanCategory.includes('tech') || cleanCategory.includes('teknologi') || cleanCategory.includes('ai') || cleanCategory.includes('web3') || cleanTitle.includes('workshop') || cleanTitle.includes('startup') || cleanTitle.includes('developer') || cleanTitle.includes('code') || cleanTitle.includes('programming')) {
+      if (cleanTitle.includes('startup') || cleanTitle.includes('networking') || cleanTitle.includes('founder')) {
+        return 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80'; // Startup networking night
+      }
+      return 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80'; // AI Workshop
+    }
+
+    // Culture keywords
+    if (cleanCategory.includes('culture') || cleanCategory.includes('budaya') || cleanCategory.includes('art') || cleanCategory.includes('seni') || cleanTitle.includes('exhibition') || cleanTitle.includes('gallery') || cleanTitle.includes('museum')) {
+      if (cleanTitle.includes('bali') || cleanTheme.includes('bali')) {
+        return 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80'; // Bali Cultural
+      }
+      if (cleanTitle.includes('walk') || cleanTitle.includes('heritage')) {
+        return 'https://images.unsplash.com/photo-1596402184320-417e7178b2cd?auto=format&fit=crop&w=800&q=80'; // Yogyakarta heritage walk
+      }
+      return 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=800&q=80'; // Art Expo
+    }
+
+    // Sports keywords
+    if (cleanCategory.includes('sport') || cleanCategory.includes('olahraga') || cleanTitle.includes('run') || cleanTitle.includes('marathon') || cleanTitle.includes('soccer') || cleanTitle.includes('football') || cleanTitle.includes('game')) {
+      return 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80'; // Sports Running
+    }
+
+    // Default fallback
+    return 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'; // JCC Senayan Tech Summit
   }
  
   private static getMockResponse(userPrompt: string, existingTitles: string[] = []) {
@@ -120,7 +172,7 @@ Return a valid JSON object matching the EXACT structure below (do not include ma
       title = `Next-Gen ${selectedCategory} Meetup 2026 (Edition ${Math.floor(Math.random() * 1000) + 1})`;
     }
 
-    return {
+    const mockObj = {
       title: title,
       category: selectedCategory,
       description: `An engaging gathering focusing on ${userPrompt.substring(0, 50)}...`,
@@ -130,8 +182,12 @@ Return a valid JSON object matching the EXACT structure below (do not include ma
       location: 'SCBD District, Jakarta Selatan',
       theme: 'Future Forward',
       price: 'Free',
-      capacity: 100
+      capacity: 100,
+      image: ''
     };
+
+    mockObj.image = this.getUnsplashImageForConcept(mockObj.category, mockObj.theme, mockObj.title);
+    return mockObj;
   }
 
   static async chatMatchmaker(message: string, history: any[] = [], eventsSummary: any[] = []) {

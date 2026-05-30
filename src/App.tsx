@@ -453,7 +453,7 @@ export default function App() {
   const [eventAddress, setEventAddress] = useState('');
   const [eventOnlineLink, setEventOnlineLink] = useState('');
   const [eventTicketName, setEventTicketName] = useState('Standard Ticket');
-  const [eventPrice, setEventPrice] = useState('150000');
+  const [eventPrice, setEventPrice] = useState('0');
   const [eventCapacity, setEventCapacity] = useState('100');
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [provideCertificate, setProvideCertificate] = useState(false);
@@ -1296,7 +1296,8 @@ export default function App() {
       setEventPosterUrl(null);
       setEventAddress('');
       setEventOnlineLink('');
-      setEventPrice('150000');
+      setEventPrice('0');
+      setTicketType('free');
       setEventCapacity('100');
       setEditingEventId(null);
       setProvideCertificate(false);
@@ -1821,7 +1822,7 @@ export default function App() {
     // 1. If we left 'create-event' view
     if (prevViewRef.current === 'create-event' && view !== 'create-event') {
       setEventType('offline');
-      setTicketType('paid');
+      setTicketType('free');
       setEventTitle('');
       setEventCategory('Tech');
       setEventDescShort('');
@@ -1832,7 +1833,7 @@ export default function App() {
       setEventAddress('');
       setEventOnlineLink('');
       setEventTicketName('Standard Ticket');
-      setEventPrice('150000');
+      setEventPrice('0');
       setEventCapacity('100');
       setEditingEventId(null);
       setShowCreateForm(false);
@@ -1937,7 +1938,7 @@ export default function App() {
 
   // Create Event Form States
   const [eventType, setEventType] = useState('offline'); // 'offline' | 'online'
-  const [ticketType, setTicketType] = useState('paid'); // 'free' | 'paid'
+  const [ticketType, setTicketType] = useState('free'); // 'free' | 'paid'
   const [eventTitle, setEventTitle] = useState('');
   const [eventCategory, setEventCategory] = useState('Tech');
   const [eventDescShort, setEventDescShort] = useState('');
@@ -6829,7 +6830,8 @@ export default function App() {
                         setEventPosterUrl(null);
                         setEventAddress('');
                         setEventOnlineLink('');
-                        setEventPrice('150000');
+                        setEventPrice('0');
+                        setTicketType('free');
                         setEventCapacity('100');
                         setProvideCertificate(false);
                         setEventIsExternal(false);
@@ -6919,16 +6921,7 @@ export default function App() {
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Event Title <span className="text-red-500">*</span></label>
-                            <div className="relative">
-                              <input type="text" maxLength={80} placeholder="e.g. Next-Gen Tech Meetup 2026" value={eventTitle} onChange={e => setEventTitle(e.target.value)} className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                              <button
-                                type="button"
-                                onClick={() => handleVoiceInputForField('title')}
-                                className={`absolute right-3 top-3 p-1.5 rounded-full transition-all ${activeVoiceField === 'title' ? 'bg-red-500 text-white animate-pulse shadow-md' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-750'}`}
-                              >
-                                <Mic className="w-4 h-4" />
-                              </button>
-                            </div>
+                            <input type="text" maxLength={80} placeholder="e.g. Next-Gen Tech Meetup 2026" value={eventTitle} onChange={e => setEventTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
                             <p className="text-xs text-slate-400 mt-1">Max 80 characters.</p>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -7027,108 +7020,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      <hr className="border-slate-100 dark:border-slate-800" />
 
-                      {/* 4. Ticket Configuration */}
-                      <div>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Ticket Settings</h3>
-                        
-                        {/* External Event Toggle */}
-                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 mb-4">
-                          <div className="text-left">
-                            <span className="text-sm font-bold text-slate-900 dark:text-white">Event Eksternal (Aggregator Mode)</span>
-                            <p className="text-xs text-slate-550 dark:text-slate-400 mt-0.5">
-                              Aktifkan jika pendaftaran tiket dilakukan melalui platform eksternal (seperti Loket.com, Eventbrite, Klook, dsb).
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setEventIsExternal(!eventIsExternal)}
-                            className={`w-12 h-6 rounded-full transition-colors relative flex items-center shrink-0 ${eventIsExternal ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-650'}`}
-                          >
-                            <span className="sr-only">Toggle Event Eksternal</span>
-                            <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${eventIsExternal ? 'left-7' : 'left-1'}`} />
-                          </button>
-                        </div>
-
-                        {eventIsExternal ? (
-                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Provider Eksternal <span className="text-red-500">*</span></label>
-                                <input 
-                                  type="text" 
-                                  placeholder="e.g. Loket.com, Eventbrite, Klook" 
-                                  value={eventExternalProvider} 
-                                  onChange={e => setEventExternalProvider(e.target.value)} 
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" 
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tautan Pendaftaran (URL) <span className="text-red-500">*</span></label>
-                                <input 
-                                  type="url" 
-                                  placeholder="https://" 
-                                  value={eventExternalUrl} 
-                                  onChange={e => setEventExternalUrl(e.target.value)} 
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" 
-                                />
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenis Tiket Tampilan <span className="text-red-500">*</span></label>
-                                <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
-                                  <option value="paid">Paid</option>
-                                  <option value="free">Free</option>
-                                </select>
-                              </div>
-                              {ticketType !== 'free' && (
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Harga Tiket Tampilan (IDR)</label>
-                                  <div className="relative">
-                                    <span className="absolute left-4 top-3 text-slate-500 font-bold">Rp</span>
-                                    <input type="number" placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
-                                  <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Type <span className="text-red-500">*</span></label>
-                                  <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
-                                    <option value="paid">Paid</option>
-                                    <option value="free">Free</option>
-                                  </select>
-                                </div>
-                              </div>
-                              
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Price (IDR)</label>
-                                  <div className="relative">
-                                    <span className="absolute left-4 top-3 text-slate-500 font-bold">Rp</span>
-                                    <input type="number" disabled={ticketType === 'free'} placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className={`w-full pl-12 pr-4 py-3 rounded-xl border ${ticketType === 'free' ? 'bg-slate-100 dark:bg-slate-900 border-transparent text-slate-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white'} focus:ring-2 focus:ring-indigo-500 outline-none`} />
-                                  </div>
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
-                                  <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
 
                       <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 justify-end">
                         {!(editingEventId && events.find(e => e.id === editingEventId)?.status === 'active') && (
