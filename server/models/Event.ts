@@ -75,7 +75,7 @@ Event.init(
       allowNull: false,
     },
     image: {
-      type: DataTypes.STRING(1000),
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     isTrending: {

@@ -6877,8 +6877,30 @@ export default function App() {
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
+                                  if (!file.type.startsWith('image/')) {
+                                    setToast({ message: 'Harap unggah file gambar (PNG/JPG)', show: true });
+                                    setTimeout(() => setToast({ message: '', show: false }), 3000);
+                                    return;
+                                  }
                                   const reader = new FileReader();
-                                  reader.onloadend = () => setEventPosterUrl(reader.result as string);
+                                  reader.onloadend = async () => {
+                                    const base64Data = reader.result as string;
+                                    setIsGlobalLoading(true);
+                                    try {
+                                      const res = await apiFetch('/api/upload/upload', {
+                                        method: 'POST',
+                                        body: JSON.stringify({ image: base64Data })
+                                      });
+                                      setEventPosterUrl(res.url);
+                                      setToast({ message: 'Poster berhasil diunggah! 📸', show: true });
+                                      setTimeout(() => setToast({ message: '', show: false }), 3000);
+                                    } catch (err: any) {
+                                      setToast({ message: err.message || 'Gagal mengunggah poster', show: true });
+                                      setTimeout(() => setToast({ message: '', show: false }), 4000);
+                                    } finally {
+                                      setIsGlobalLoading(false);
+                                    }
+                                  };
                                   reader.readAsDataURL(file);
                                 }
                               }}
