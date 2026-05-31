@@ -302,7 +302,7 @@ const isDayOfEventOrPassed = (eventDateStr: string) => {
 };
 
 export default function App() {
-  const [view, setView] = useState<View>('landing');
+  const [view, setViewInternal] = useState<View>('landing');
   const [lang, setLang] = useState<Language>('en');
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -318,6 +318,17 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (view === 'create-event' && editingEventId !== null) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [view, editingEventId]);
   const [organizerTab, setOrganizerTab] = useState('dashboard');
   const [publishedEventsTab, setPublishedEventsTab] = useState<'published' | 'drafts' | 'past'>('published');
   const [managingEvent, setManagingEvent] = useState<any>(null);
@@ -456,6 +467,16 @@ export default function App() {
   const [eventPrice, setEventPrice] = useState('0');
   const [eventCapacity, setEventCapacity] = useState('100');
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
+
+  const setView = (newView: View) => {
+    if (view === 'create-event' && editingEventId !== null && newView !== 'create-event') {
+      const confirmLeave = window.confirm("Anda sedang mengedit event. Apakah ingin meninggalkan halaman edit? Perubahan yang belum disimpan akan hilang.");
+      if (!confirmLeave) {
+        return;
+      }
+    }
+    setViewInternal(newView);
+  };
   const [provideCertificate, setProvideCertificate] = useState(false);
   const [distributingCertificates, setDistributingCertificates] = useState(false);
 
@@ -3304,9 +3325,9 @@ export default function App() {
       <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-6xl mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-6 w-full md:items-start">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-[65%]">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col flex-grow h-full">
               <div className="relative">
-                <img src={selectedEvent.image} alt="" className="w-full h-48 object-cover" />
+                <img src={selectedEvent.image} alt="" className="w-full h-64 object-cover" />
                 <div className="absolute top-4 left-4 flex gap-2">
                   <span className="bg-white/90 text-indigo-600 font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider backdrop-blur-sm">{selectedEvent.category}</span>
                 </div>
@@ -3364,10 +3385,10 @@ export default function App() {
             </div>
           </motion.div>
           
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-[35%] flex flex-col md:self-start h-fit">
-            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col h-fit relative overflow-hidden">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-[35%] flex flex-col">
+            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col flex-grow relative overflow-hidden">
               <div className="absolute -top-10 -right-10 opacity-5"><Ticket className="w-48 h-48" /></div>
-              <div className="relative z-10 text-white">
+              <div className="relative z-10 text-white flex flex-col flex-grow">
                 <h3 className="text-xl font-black mb-6">{t.ticketDetails}</h3>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
                   {selectedEvent.isExternal ? (
@@ -3397,61 +3418,63 @@ export default function App() {
                   )}
                 </div>
                 
-                <div className="flex gap-3 mb-3">
-                  {selectedEvent.isSalesClosed ? (
-                    <button 
-                      disabled
-                      className="flex-grow bg-slate-800 text-slate-500 py-3.5 rounded-xl font-bold cursor-not-allowed text-sm"
-                    >
-                      Ticket Sales Closed
-                    </button>
-                  ) : selectedEvent.isExternal ? (
-                    <a 
-                      href={selectedEvent.externalUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-grow text-center bg-indigo-500 hover:bg-indigo-400 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center"
-                    >
-                      Beli Tiket di {selectedEvent.externalProvider || 'Tiket.com'}
-                    </a>
-                  ) : (
-                    <button 
-                      onClick={() => {
-                        if (currentUser && selectedEvent.organizerId === currentUser.id) {
-                          setToast({ message: "Organizers are not allowed to purchase tickets for their own events.", show: true });
-                          setTimeout(() => setToast({ message: '', show: false }), 4000);
-                          return;
-                        }
-                        handleGoToCheckoutDetails();
-                      }}
-                      className="flex-grow bg-indigo-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-400 active:scale-95 transition-all text-sm"
-                    >
-                      {t.getTickets}
-                    </button>
-                  )}
-                  {!(isAuthenticated && selectedEvent.organizerId === (currentUser?.preferences?.joinedTeamOf || currentUser?.id)) && (
-                    <button 
-                      onClick={() => handleToggleSave(selectedEvent.id)}
-                      className="bg-slate-800 border border-slate-700 text-slate-300 p-3.5 rounded-xl font-bold hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer"
-                      title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
-                    >
-                      <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-400 text-indigo-400" : "text-slate-400"}`} />
-                    </button>
-                  )}
+                <div className="mt-auto pt-4">
+                  <div className="flex gap-3 mb-3">
+                    {selectedEvent.isSalesClosed ? (
+                      <button 
+                        disabled
+                        className="flex-grow bg-slate-800 text-slate-500 py-3.5 rounded-xl font-bold cursor-not-allowed text-sm"
+                      >
+                        Ticket Sales Closed
+                      </button>
+                    ) : selectedEvent.isExternal ? (
+                      <a 
+                        href={selectedEvent.externalUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-grow text-center bg-indigo-500 hover:bg-indigo-400 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center"
+                      >
+                        Beli Tiket di {selectedEvent.externalProvider || 'Tiket.com'}
+                      </a>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          if (currentUser && selectedEvent.organizerId === currentUser.id) {
+                            setToast({ message: "Organizers are not allowed to purchase tickets for their own events.", show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 4000);
+                            return;
+                          }
+                          handleGoToCheckoutDetails();
+                        }}
+                        className="flex-grow bg-indigo-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-400 active:scale-95 transition-all text-sm"
+                      >
+                        {t.getTickets}
+                      </button>
+                    )}
+                    {!(isAuthenticated && selectedEvent.organizerId === (currentUser?.preferences?.joinedTeamOf || currentUser?.id)) && (
+                      <button 
+                        onClick={() => handleToggleSave(selectedEvent.id)}
+                        className="bg-slate-800 border border-slate-700 text-slate-300 p-3.5 rounded-xl font-bold hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer"
+                        title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
+                      >
+                        <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-400 text-indigo-400" : "text-slate-400"}`} />
+                      </button>
+                    )}
+                  </div>
+                   <button 
+                    onClick={() => {
+                      if (view === 'ticket-preview') {
+                        setView(previousView || 'landing');
+                      } else {
+                        setCheckoutModal(null);
+                      }
+                    }} 
+                    className="w-full bg-slate-800 border border-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors"
+                  >
+                      Back to previous page
+                  </button>
+                  <p className="text-center text-[10px] text-slate-500 mt-2">Secure checkout</p>
                 </div>
-                 <button 
-                  onClick={() => {
-                    if (view === 'ticket-preview') {
-                      setView(previousView || 'landing');
-                    } else {
-                      setCheckoutModal(null);
-                    }
-                  }} 
-                  className="w-full bg-slate-800 border border-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors"
-                >
-                    Back to previous page
-                </button>
-                <p className="text-center text-[10px] text-slate-500">Secure checkout</p>
               </div>
             </div>
           </motion.div>
