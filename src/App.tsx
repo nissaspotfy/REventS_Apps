@@ -226,7 +226,7 @@ const translations = {
       step5Title: "All Set!",
       step5Desc: "Your profile is optimized by AI."
     },
-    categories: ['All', 'Music', 'Tech', 'Food & Drink', 'Culture', 'Sports'],
+    categories: ['All', 'Music', 'Tech', 'Food & Drink', 'Culture', 'Sports', 'Self Development'],
     facebookAuth: "Facebook",
     linkedinAuth: "LinkedIn",
     checkout: "Checkout",
@@ -253,7 +253,7 @@ const EVENTS: Event[] = [
   { id: 6, title: "Coffee Brewing Masterclass", category: "Food & Drink", date: "Sunday, June 30", month: "JUN", day: "30", location: "Roastery Lab, Tebet", price: "IDR 150.000", image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=450&q=70", organizerId: 1 }
 ];
 
-const CATEGORIES = ['All', 'Music', 'Tech', 'Food & Drink', 'Culture', 'Sports'];
+const CATEGORIES = ['All', 'Music', 'Tech', 'Food & Drink', 'Culture', 'Sports', 'Self Development'];
 
 const isDayOfEventOrPassed = (eventDateStr: string) => {
   try {
@@ -3333,26 +3333,28 @@ export default function App() {
               <div className="relative z-10 text-white">
                 <h3 className="text-xl font-black mb-6">{t.ticketDetails}</h3>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
-                  <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-3">
-                    <span className="text-sm text-slate-400 font-medium">{selectedEvent.ticketName || 'Standard Ticket'}</span>
-                    {selectedEvent.isExternal ? (
+                  {selectedEvent.isExternal ? (
+                    <div className="flex justify-end mb-3 border-b border-slate-700 pb-3">
                       <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 bg-indigo-500/10 rounded-md border border-indigo-500/20">
                         {selectedEvent.externalProvider || 'Eksternal'}
                       </span>
-                    ) : (
+                    </div>
+                  ) : (
+                    <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-3">
+                      <span className="text-sm text-slate-400 font-medium">{selectedEvent.ticketName || 'Standard Ticket'}</span>
                       <span className="text-xs text-slate-550">x 1</span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-slate-300">
-                      {selectedEvent.isExternal ? 'Estimasi Harga' : 'Total'}
+                      {selectedEvent.isExternal ? `Harga (via ${selectedEvent.externalProvider || 'Eventbrite'})` : 'Total'}
                     </span>
                     <span className="text-2xl font-black text-white">{selectedEvent.price}</span>
                   </div>
-                  {selectedEvent.isExternal && selectedEvent.capacity && (
+                  {selectedEvent.isExternal && (
                     <div className="text-[11px] text-slate-400 mt-2 border-t border-slate-750 pt-2 flex justify-between">
-                      <span>Kapasitas Quota</span>
-                      <span className="font-bold text-slate-200">{selectedEvent.capacity}</span>
+                      <span>Kapasitas</span>
+                      <span className="font-bold text-slate-200">Cek di {selectedEvent.externalProvider || 'Eventbrite'}</span>
                     </div>
                   )}
                 </div>
@@ -6171,7 +6173,7 @@ export default function App() {
                         <div>
                         <label className="text-sm font-bold text-slate-900 dark:text-white mb-3 block">{t.categoriesLabel}</label>
                         <div className="flex flex-wrap gap-2">
-                          {['Music', 'Tech', 'Food & Drink', 'Culture', 'Sports'].map(cat => {
+                          {['Music', 'Tech', 'Food & Drink', 'Culture', 'Sports', 'Self Development'].map(cat => {
                             const isSelected = prefCategories.includes(cat);
                             return (
                               <button 
@@ -6657,7 +6659,7 @@ export default function App() {
                     <div>
                     <label className="text-sm font-bold text-slate-900 dark:text-white mb-3 block">{t.categoriesLabel}</label>
                     <div className="flex flex-wrap gap-2">
-                      {['Music', 'Tech', 'Food & Drink', 'Culture', 'Sports'].map(cat => {
+                      {['Music', 'Tech', 'Food & Drink', 'Culture', 'Sports', 'Self Development'].map(cat => {
                         const isSelected = prefCategories.includes(cat);
                         return (
                           <button 
@@ -6939,6 +6941,7 @@ export default function App() {
                                 <option value="Food & Drink">Food & Drink</option>
                                 <option value="Culture">Culture</option>
                                 <option value="Sports">Sports</option>
+                                <option value="Self Development">Self Development</option>
                               </select>
                             </div>
                           </div>
@@ -7075,7 +7078,9 @@ export default function App() {
                           <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                  Ticket Name {eventIsExternal ? '(Optional)' : <span className="text-red-500">*</span>}
+                                </label>
                                 <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
                               </div>
                               <div>
@@ -7096,7 +7101,9 @@ export default function App() {
                                 </div>
                               </div>
                               <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                  Capacity (Quota/Stock) {eventIsExternal ? '(Optional)' : <span className="text-red-500">*</span>}
+                                </label>
                                 <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
                               </div>
                             </div>

@@ -153,7 +153,7 @@ Return a valid JSON object matching the EXACT structure below (do not include ma
  
   private static getMockResponse(userPrompt: string, existingTitles: string[] = []) {
     // Generate a reasonable mock draft if API fails or is not available
-    const categories = ['Tech', 'Music', 'Food & Drink', 'Culture', 'Sports'];
+    const categories = ['Tech', 'Music', 'Food & Drink', 'Culture', 'Sports', 'Self Development'];
     let selectedCategory = 'Tech';
     
     const lowerPrompt = userPrompt.toLowerCase();
