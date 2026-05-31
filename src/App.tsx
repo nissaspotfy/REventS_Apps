@@ -1929,6 +1929,7 @@ export default function App() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pendingRSVP, setPendingRSVP] = useState<any>(null);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileName, setProfileName] = useState('John Smith');
   const [profileEmail, setProfileEmail] = useState('john@example.com');
@@ -2057,8 +2058,8 @@ export default function App() {
   const handleGetTickets = (event: any) => {
     setSelectedEvent(event);
     setPreviousView(view);
-    setView('ticket-preview');
-    setCheckoutModal(null);
+    setIsOverviewExpanded(false);
+    setCheckoutModal('preview');
   };
 
   const handleCancelRedirect = () => {
@@ -3298,6 +3299,7 @@ export default function App() {
 
   const TicketPreviewView = () => {
     if (!selectedEvent) return null;
+    const description = selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}.`;
     return (
       <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-6xl mx-auto w-full">
         <div className="flex flex-col md:flex-row gap-6 w-full md:items-start">
@@ -3340,7 +3342,23 @@ export default function App() {
                         {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Akses Virtual' : 'Indonesia'}
                       </p>
                     </div>
-                  </div>
+                </div>
+              </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">{t.overview}</h3>
+                <div className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+                  {description.length > 180 ? (
+                    <>
+                      {isOverviewExpanded ? description : `${description.slice(0, 180)}... `}
+                      <button 
+                        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+                        className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline ml-1 focus:outline-none cursor-pointer"
+                      >
+                        {isOverviewExpanded ? 'Read Less' : 'Read More'}
+                      </button>
+                    </>
+                  ) : (
+                    description
+                  )}
                 </div>
               </div>
             </div>
@@ -3437,14 +3455,6 @@ export default function App() {
               </div>
             </div>
           </motion.div>
-        </div>
-
-        {/* Row 2: Overview (Melebar / Full Width, Unwrapped) */}
-        <div className="w-full mt-10 mb-16">
-          <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t.overview}</h3>
-          <p className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed whitespace-pre-line">
-            {selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}.`}
-          </p>
         </div>
       </div>
     );
@@ -6795,7 +6805,7 @@ export default function App() {
     </div>
   );
 
-  const isFullScreenView = view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
+  const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
   
   const showHeader = !isFullScreenView || (isMobile && (view === 'dashboard' || view === 'create-event'));
   const useFullScreenLayout = isFullScreenView && !(isMobile && (view === 'dashboard' || view === 'create-event'));
