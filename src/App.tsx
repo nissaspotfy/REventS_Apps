@@ -430,6 +430,50 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
+    const isModalOpen = !!(
+      checkoutModal ||
+      showGoogleAccounts ||
+      showForgotPassword ||
+      showResetPassword ||
+      showTicketModal ||
+      showRefundModal ||
+      showSavedEventModal ||
+      showInterestModal ||
+      showDuplicateEmailModal ||
+      selectedScrapbookTicket ||
+      redirectingEvent ||
+      showMidtransSnap ||
+      view === 'create-event' ||
+      isGlobalLoading
+    );
+
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [
+    checkoutModal,
+    showGoogleAccounts,
+    showForgotPassword,
+    showResetPassword,
+    showTicketModal,
+    showRefundModal,
+    showSavedEventModal,
+    showInterestModal,
+    showDuplicateEmailModal,
+    selectedScrapbookTicket,
+    redirectingEvent,
+    showMidtransSnap,
+    view,
+    isGlobalLoading
+  ]);
+
+  React.useEffect(() => {
     if (!showMidtransSnap) return;
     let seconds = 900; // 15 mins
     const interval = setInterval(() => {
@@ -3336,13 +3380,19 @@ export default function App() {
                 <span className="bg-white/90 text-indigo-600 font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider backdrop-blur-sm z-30">{selectedEvent.category}</span>
               </div>
               
-              {/* Saved Bookmark button */}
+              {/* Close Button inside banner */}
               <button 
-                onClick={() => handleToggleSave(selectedEvent.id)}
-                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-indigo-600 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-30"
-                title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
+                onClick={() => {
+                  if (view === 'ticket-preview') {
+                    setView(previousView || 'landing');
+                  } else {
+                    setCheckoutModal(null);
+                  }
+                }}
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-750 dark:text-slate-200 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-30"
+                title="Close"
               >
-                <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-600 text-indigo-600" : "text-slate-650"}`} />
+                <X className="w-5 h-5" />
               </button>
 
               {/* Total Price overlay */}
@@ -3355,7 +3405,7 @@ export default function App() {
               <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{selectedEvent.title}</h1>
               
               <div className="bg-slate-50 dark:bg-slate-800/35 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 mb-6 space-y-4">
-                {/* Tanggal & Waktu + RSVP Button */}
+                {/* Tanggal & Waktu + BUY TICKET Button */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
@@ -3384,7 +3434,7 @@ export default function App() {
                         rel="noopener noreferrer"
                         className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center cursor-pointer"
                       >
-                        RSVP Ticket (via {selectedEvent.externalProvider || 'Eksternal'})
+                        BUY TICKET (via {selectedEvent.externalProvider || 'Eksternal'})
                       </a>
                     ) : (
                       <button 
@@ -3398,7 +3448,7 @@ export default function App() {
                         }}
                         className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-5 rounded-xl font-bold shadow-lg active:scale-95 transition-all text-sm cursor-pointer"
                       >
-                        RSVP Ticket
+                        BUY TICKET
                       </button>
                     )}
                   </div>
@@ -7668,15 +7718,6 @@ export default function App() {
               exit={{ opacity: 0 }} 
               className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md overflow-y-auto no-scrollbar p-4 md:p-8 flex justify-center items-start"
             >
-               {/* Floating Close Button */}
-               <button 
-                 onClick={() => setCheckoutModal(null)} 
-                 className="fixed top-6 right-6 z-[60] bg-slate-950/80 hover:bg-slate-900/90 text-white hover:text-indigo-400 p-3 rounded-full backdrop-blur-md transition-all border border-slate-800 flex items-center justify-center shadow-2xl hover:scale-105"
-                 title="Close Checkout"
-               >
-                 <X className="w-5 h-5" />
-               </button>
-
                <motion.div 
                  initial={{ scale: 0.95, y: 20 }} 
                  animate={{ scale: 1, y: 0 }} 
