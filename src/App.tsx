@@ -1246,7 +1246,11 @@ export default function App() {
       const formattedPrice = ticketType === 'free' ? 'Free' : `IDR ${Number(eventPrice || 0).toLocaleString('id-ID')}`;
 
       const finalLocation = eventType === 'offline' 
-        ? (eventAddress ? `${eventCity}, ${eventAddress}` : eventCity)
+        ? (eventAddress 
+            ? (eventAddress.toLowerCase().includes(eventCity.toLowerCase()) 
+                ? eventAddress 
+                : `${eventCity}, ${eventAddress}`) 
+            : eventCity)
         : 'Online';
 
       const requestBody = {
@@ -3307,20 +3311,24 @@ export default function App() {
               <div className="p-6">
                 <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{selectedEvent.title}</h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
-                    <Calendar className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedEvent.date}</p>
-                      <p className="text-xs text-slate-550">{selectedEvent.time || '18:00 - 22:00'}</p>
+                  <div className="flex items-start gap-3.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 h-full">
+                    <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Tanggal & Waktu</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{selectedEvent.date}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
-                    <MapPin className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">
+                  <div className="flex items-start gap-3.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 h-full">
+                    <MapPin className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Lokasi</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug break-words">
                         {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Online' : selectedEvent.location}
                       </p>
-                      <p className="text-xs text-slate-500 truncate">Indonesia</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Akses Virtual' : 'Indonesia'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -3339,7 +3347,8 @@ export default function App() {
                 <h3 className="text-xl font-black mb-6">{t.ticketDetails}</h3>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
                   {selectedEvent.isExternal ? (
-                    <div className="flex justify-end mb-3 border-b border-slate-700 pb-3">
+                    <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-3">
+                      <span className="text-xs text-slate-450 font-bold uppercase tracking-wide">Pendaftaran Eksternal</span>
                       <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 bg-indigo-500/10 rounded-md border border-indigo-500/20">
                         {selectedEvent.externalProvider || 'Eksternal'}
                       </span>
