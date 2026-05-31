@@ -3323,7 +3323,7 @@ export default function App() {
     if (!selectedEvent) return null;
     const description = selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}.`;
     return (
-      <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-2xl mx-auto w-full">
+      <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-4xl mx-auto w-full">
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
@@ -3333,22 +3333,20 @@ export default function App() {
             <div className="relative">
               <img src={selectedEvent.image} alt="" className="w-full h-64 object-cover" />
               <div className="absolute top-4 left-4 flex gap-2">
-                <span className="bg-white/90 text-indigo-600 font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider backdrop-blur-sm">{selectedEvent.category}</span>
+                <span className="bg-white/90 text-indigo-600 font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider backdrop-blur-sm z-30">{selectedEvent.category}</span>
               </div>
               
               {/* Saved Bookmark button */}
-              {!(isAuthenticated && selectedEvent.organizerId === (currentUser?.preferences?.joinedTeamOf || currentUser?.id)) && (
-                <button 
-                  onClick={() => handleToggleSave(selectedEvent.id)}
-                  className="absolute top-4 right-4 bg-white/90 hover:bg-white text-indigo-600 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-20"
-                  title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
-                >
-                  <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-600 text-indigo-600" : "text-slate-650"}`} />
-                </button>
-              )}
+              <button 
+                onClick={() => handleToggleSave(selectedEvent.id)}
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-indigo-600 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-30"
+                title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
+              >
+                <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-600 text-indigo-600" : "text-slate-650"}`} />
+              </button>
 
               {/* Total Price overlay */}
-              <div className="absolute bottom-4 left-4 bg-slate-900/80 text-white font-extrabold px-3 py-1.5 rounded-lg text-sm backdrop-blur-sm shadow-md border border-white/10 z-20">
+              <div className="absolute bottom-4 left-4 bg-slate-900/80 text-white font-extrabold px-3 py-1.5 rounded-lg text-sm backdrop-blur-sm shadow-md border border-white/10 z-30">
                 {selectedEvent.price}
               </div>
             </div>
@@ -3357,53 +3355,53 @@ export default function App() {
               <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{selectedEvent.title}</h1>
               
               <div className="bg-slate-50 dark:bg-slate-800/35 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 mb-6 space-y-4">
-                {/* Tanggal & Waktu */}
-                <div className="flex items-start gap-4">
-                  <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
-                    <Calendar className="w-5 h-5" />
+                {/* Tanggal & Waktu + RSVP Button */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
+                      <Calendar className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Tanggal & Waktu</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{selectedEvent.date}</p>
+                      <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Tanggal & Waktu</p>
-                    <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{selectedEvent.date}</p>
-                    <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
+
+                  {/* Tombol Registrasi Tiket (di sebelah kanan) */}
+                  <div className="shrink-0 w-full sm:w-auto min-w-[200px]">
+                    {selectedEvent.isSalesClosed ? (
+                      <button 
+                        disabled
+                        className="w-full bg-slate-200 dark:bg-slate-850 text-slate-500 py-3 px-5 rounded-xl font-bold cursor-not-allowed text-sm text-center"
+                      >
+                        Ticket Sales Closed
+                      </button>
+                    ) : selectedEvent.isExternal ? (
+                      <a 
+                        href={selectedEvent.externalUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center cursor-pointer"
+                      >
+                        RSVP Ticket (via {selectedEvent.externalProvider || 'Eksternal'})
+                      </a>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          if (currentUser && selectedEvent.organizerId === currentUser.id) {
+                            setToast({ message: "Organizers are not allowed to purchase tickets for their own events.", show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 4000);
+                            return;
+                          }
+                          handleGoToCheckoutDetails();
+                        }}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-5 rounded-xl font-bold shadow-lg active:scale-95 transition-all text-sm cursor-pointer"
+                      >
+                        RSVP Ticket
+                      </button>
+                    )}
                   </div>
-                </div>
-
-                <div className="border-t border-slate-200/50 dark:border-slate-800/60 my-1"></div>
-
-                {/* Tombol Registrasi Tiket */}
-                <div className="py-1">
-                  {selectedEvent.isSalesClosed ? (
-                    <button 
-                      disabled
-                      className="w-full bg-slate-200 dark:bg-slate-850 text-slate-500 py-3.5 rounded-xl font-bold cursor-not-allowed text-sm text-center"
-                    >
-                      Ticket Sales Closed
-                    </button>
-                  ) : selectedEvent.isExternal ? (
-                    <a 
-                      href={selectedEvent.externalUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center cursor-pointer"
-                    >
-                      Beli Tiket di {selectedEvent.externalProvider || 'Tiket.com'}
-                    </a>
-                  ) : (
-                    <button 
-                      onClick={() => {
-                        if (currentUser && selectedEvent.organizerId === currentUser.id) {
-                          setToast({ message: "Organizers are not allowed to purchase tickets for their own events.", show: true });
-                          setTimeout(() => setToast({ message: '', show: false }), 4000);
-                          return;
-                        }
-                        handleGoToCheckoutDetails();
-                      }}
-                      className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-700 active:scale-95 transition-all text-sm cursor-pointer"
-                    >
-                      {t.getTickets}
-                    </button>
-                  )}
                 </div>
 
                 <div className="border-t border-slate-200/50 dark:border-slate-800/60 my-1"></div>
@@ -3440,22 +3438,6 @@ export default function App() {
                 ) : (
                   description
                 )}
-              </div>
-
-              {/* Back Button */}
-              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-center">
-                <button 
-                  onClick={() => {
-                    if (view === 'ticket-preview') {
-                      setView(previousView || 'landing');
-                    } else {
-                      setCheckoutModal(null);
-                    }
-                  }} 
-                  className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition-all text-xs flex items-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" /> Kembali ke halaman sebelumnya
-                </button>
               </div>
             </div>
           </div>
