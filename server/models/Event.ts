@@ -34,6 +34,7 @@ export class Event extends Model {
   public isExternal!: boolean;
   public externalUrl?: string;
   public externalProvider?: string;
+  public time?: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -181,6 +182,11 @@ Event.init(
     externalProvider: {
       type: DataTypes.STRING(255),
       allowNull: true,
+    },
+    time: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      defaultValue: '18:00 - 22:00',
     },
   },
   {

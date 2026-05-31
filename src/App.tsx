@@ -827,6 +827,7 @@ export default function App() {
     setEventCapacity(ev.capacity ? ev.capacity.toString() : '100');
     setEventPosterUrl(ev.image || null);
     setEventTicketName(ev.ticketName || 'Standard Ticket');
+    setEventTime(ev.time || '18:00 - 22:00');
     setProvideCertificate(!!ev.provideCertificate);
     setEventIsExternal(!!ev.isExternal);
     setEventExternalUrl(ev.externalUrl || '');
@@ -1252,6 +1253,7 @@ export default function App() {
         title: eventTitle,
         category: eventCategory,
         date: eventDate,
+        time: eventTime,
         location: finalLocation,
         price: formattedPrice,
         image: eventPosterUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
@@ -1294,6 +1296,7 @@ export default function App() {
       setEventDescShort('');
       setEventDescFull('');
       setEventPosterUrl(null);
+      setEventTime('18:00 - 22:00');
       setEventAddress('');
       setEventOnlineLink('');
       setEventPrice('0');
@@ -1829,6 +1832,7 @@ export default function App() {
       setEventDescFull('');
       setEventPosterUrl(null);
       setEventDate('2026-06-15');
+      setEventTime('18:00 - 22:00');
       setEventCity('Jakarta, ID');
       setEventAddress('');
       setEventOnlineLink('');
@@ -1944,6 +1948,7 @@ export default function App() {
   const [eventDescShort, setEventDescShort] = useState('');
   const [eventDescFull, setEventDescFull] = useState('');
   const [eventPosterUrl, setEventPosterUrl] = useState<string | null>(null);
+  const [eventTime, setEventTime] = useState('18:00 - 22:00');
 
   // External Event and Redirection States
   const [redirectingEvent, setRedirectingEvent] = useState<any>(null);
@@ -3306,7 +3311,7 @@ export default function App() {
                     <Calendar className="w-5 h-5 text-indigo-600 flex-shrink-0" />
                     <div>
                       <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedEvent.date}</p>
-                      <p className="text-xs text-slate-500">18:00 - 22:00</p>
+                      <p className="text-xs text-slate-550">{selectedEvent.time || '18:00 - 22:00'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
@@ -4457,6 +4462,7 @@ export default function App() {
                             setEventDescShort(copilotResultObj.description || '');
                             setEventDescFull(copilotResultObj.fullDescription || '');
                             if (copilotResultObj.date) setEventDate(copilotResultObj.date);
+                            if (copilotResultObj.time) setEventTime(copilotResultObj.time);
                             if (copilotResultObj.location) { setEventAddress(copilotResultObj.location); setEventCity(copilotResultObj.location); }
                             setEventPosterUrl(copilotResultObj.image || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000");
                             if (copilotResultObj.price) {
@@ -6928,10 +6934,14 @@ export default function App() {
                             <input type="text" maxLength={80} placeholder="e.g. Next-Gen Tech Meetup 2026" value={eventTitle} onChange={e => setEventTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
                             <p className="text-xs text-slate-400 mt-1">Max 80 characters.</p>
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Event Date <span className="text-red-500">*</span></label>
                               <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Event Time <span className="text-red-500">*</span></label>
+                              <input type="text" placeholder="e.g. 18:00 - 22:00" value={eventTime} onChange={e => setEventTime(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
                             </div>
                             <div>
                               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Event Category <span className="text-red-500">*</span></label>
