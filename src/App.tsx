@@ -3342,11 +3342,15 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">{t.overview}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}. This event will feature industry leaders, engaging activities, and ample networking opportunities to propel you forward.`}
-                </p>
               </div>
+            </div>
+
+            {/* Overview Card (Separated) */}
+            <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-100 dark:border-slate-800">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t.overview}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+                {selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}. This event will feature industry leaders, engaging activities, and ample networking opportunities to propel you forward.`}
+              </p>
             </div>
           </motion.div>
           
@@ -6791,7 +6795,7 @@ export default function App() {
     </div>
   );
 
-  const isFullScreenView = view === 'ticket-preview' || view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
+  const isFullScreenView = view === 'checkout-details' || view === 'checkout' || view === 'dashboard' || view === 'create-event';
   
   const showHeader = !isFullScreenView || (isMobile && (view === 'dashboard' || view === 'create-event'));
   const useFullScreenLayout = isFullScreenView && !(isMobile && (view === 'dashboard' || view === 'create-event'));
