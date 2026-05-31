@@ -2057,7 +2057,8 @@ export default function App() {
   const handleGetTickets = (event: any) => {
     setSelectedEvent(event);
     setPreviousView(view);
-    setCheckoutModal('preview');
+    setView('ticket-preview');
+    setCheckoutModal(null);
   };
 
   const handleCancelRedirect = () => {
@@ -3424,7 +3425,16 @@ export default function App() {
                     </button>
                   )}
                 </div>
-                <button onClick={() => setCheckoutModal(null)} className="w-full bg-slate-800 border border-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors">
+                 <button 
+                  onClick={() => {
+                    if (view === 'ticket-preview') {
+                      setView(previousView || 'landing');
+                    } else {
+                      setCheckoutModal(null);
+                    }
+                  }} 
+                  className="w-full bg-slate-800 border border-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors"
+                >
                     Back to previous page
                 </button>
                 <p className="text-center text-[10px] text-slate-500">Secure checkout</p>
@@ -3880,7 +3890,13 @@ export default function App() {
           {/* Form Actions */}
           <div className="pt-4 flex flex-col sm:flex-row gap-4">
             <button 
-              onClick={() => setCheckoutModal('preview')} 
+              onClick={() => {
+                if (view === 'ticket-preview') {
+                  setCheckoutModal(null);
+                } else {
+                  setCheckoutModal('preview');
+                }
+              }} 
               className="sm:w-1/3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 py-3.5 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-sm"
             >
               Back
