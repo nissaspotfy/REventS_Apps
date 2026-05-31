@@ -30,6 +30,23 @@ export async function seedDatabase() {
     await sequelize.sync({ alter: true });
     console.log('Database models synchronized successfully.');
 
+    // Ensure "Pesona Rasa Jogja" event is deleted as requested by the user
+    try {
+      const { Op } = require('sequelize');
+      const deletedCount = await Event.destroy({
+        where: {
+          title: {
+            [Op.like]: '%Pesona Rasa Jogja%'
+          }
+        }
+      });
+      if (deletedCount > 0) {
+        console.log(`[Startup] Successfully deleted ${deletedCount} event(s) matching 'Pesona Rasa Jogja'.`);
+      }
+    } catch (err) {
+      console.error('[Startup] Failed to delete Pesona Rasa Jogja event:', err);
+    }
+
     // Seed Users
     const userCount = await User.count();
     if (userCount === 0) {

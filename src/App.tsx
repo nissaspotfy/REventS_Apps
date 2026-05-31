@@ -3310,17 +3310,26 @@ export default function App() {
               </div>
               <div className="p-6">
                 <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{selectedEvent.title}</h1>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-start gap-3.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 h-full">
-                    <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+                <div className="bg-slate-50 dark:bg-slate-800/35 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 mb-6 space-y-4">
+                  {/* Tanggal & Waktu */}
+                  <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
+                      <Calendar className="w-5 h-5" />
+                    </div>
                     <div className="min-w-0">
                       <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Tanggal & Waktu</p>
                       <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{selectedEvent.date}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
+                      <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 h-full">
-                    <MapPin className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+
+                  <div className="border-t border-slate-200/50 dark:border-slate-800/60 my-1"></div>
+
+                  {/* Lokasi */}
+                  <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
+                      <MapPin className="w-5 h-5" />
+                    </div>
                     <div className="min-w-0">
                       <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Lokasi</p>
                       <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug break-words">
