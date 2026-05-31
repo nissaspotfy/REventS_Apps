@@ -3299,8 +3299,8 @@ export default function App() {
     if (!selectedEvent) return null;
     return (
       <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-4xl mx-auto w-full">
-        <div className="flex flex-col md:flex-row gap-6 w-full">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="md:w-3/5">
+        <div className="flex flex-col md:flex-row gap-6 w-full md:items-start">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-3/5">
             <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800">
               <div className="relative">
                 <img src={selectedEvent.image} alt="" className="w-full h-48 object-cover" />
@@ -3349,8 +3349,8 @@ export default function App() {
             </div>
           </motion.div>
           
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="md:w-2/5 flex">
-            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col justify-center relative overflow-hidden">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-2/5 flex flex-col">
+            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col relative overflow-hidden">
               <div className="absolute -top-10 -right-10 opacity-5"><Ticket className="w-48 h-48" /></div>
               <div className="relative z-10 text-white">
                 <h3 className="text-xl font-black mb-6">{t.ticketDetails}</h3>
