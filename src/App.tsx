@@ -3323,163 +3323,143 @@ export default function App() {
     if (!selectedEvent) return null;
     const description = selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}.`;
     return (
-      <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-6xl mx-auto w-full">
-        <div className="flex flex-col md:flex-row gap-6 w-full md:items-start">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-[65%]">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col flex-grow h-full">
-              <div className="relative">
-                <img src={selectedEvent.image} alt="" className="w-full h-64 object-cover" />
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <span className="bg-white/90 text-indigo-600 font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider backdrop-blur-sm">{selectedEvent.category}</span>
-                </div>
+      <div className="min-h-screen p-4 sm:p-8 flex items-center justify-center max-w-2xl mx-auto w-full">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          className="w-full"
+        >
+          <div className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col flex-grow h-full">
+            <div className="relative">
+              <img src={selectedEvent.image} alt="" className="w-full h-64 object-cover" />
+              <div className="absolute top-4 left-4 flex gap-2">
+                <span className="bg-white/90 text-indigo-600 font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider backdrop-blur-sm">{selectedEvent.category}</span>
               </div>
-              <div className="p-6">
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{selectedEvent.title}</h1>
-                <div className="bg-slate-50 dark:bg-slate-800/35 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 mb-6 space-y-4">
-                  {/* Tanggal & Waktu */}
-                  <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
-                      <Calendar className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Tanggal & Waktu</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{selectedEvent.date}</p>
-                      <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
-                    </div>
-                  </div>
+              
+              {/* Saved Bookmark button */}
+              {!(isAuthenticated && selectedEvent.organizerId === (currentUser?.preferences?.joinedTeamOf || currentUser?.id)) && (
+                <button 
+                  onClick={() => handleToggleSave(selectedEvent.id)}
+                  className="absolute top-4 right-4 bg-white/90 hover:bg-white text-indigo-600 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-20"
+                  title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
+                >
+                  <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-600 text-indigo-600" : "text-slate-650"}`} />
+                </button>
+              )}
 
-                  <div className="border-t border-slate-200/50 dark:border-slate-800/60 my-1"></div>
-
-                  {/* Lokasi */}
-                  <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Lokasi</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug break-words">
-                        {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Online' : selectedEvent.location}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Akses Virtual' : 'Indonesia'}
-                      </p>
-                    </div>
-                </div>
-              </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">{t.overview}</h3>
-                <div className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed whitespace-pre-line">
-                  {description.length > 180 ? (
-                    <>
-                      {isOverviewExpanded ? description : `${description.slice(0, 180)}... `}
-                      <button 
-                        onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
-                        className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline ml-1 focus:outline-none cursor-pointer"
-                      >
-                        {isOverviewExpanded ? 'Read Less' : 'Read More'}
-                      </button>
-                    </>
-                  ) : (
-                    description
-                  )}
-                </div>
+              {/* Total Price overlay */}
+              <div className="absolute bottom-4 left-4 bg-slate-900/80 text-white font-extrabold px-3 py-1.5 rounded-lg text-sm backdrop-blur-sm shadow-md border border-white/10 z-20">
+                {selectedEvent.price}
               </div>
             </div>
-          </motion.div>
-          
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-[35%] flex flex-col">
-            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col flex-grow relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 opacity-5"><Ticket className="w-48 h-48" /></div>
-              <div className="relative z-10 text-white flex flex-col flex-grow">
-                <h3 className="text-xl font-black mb-6">{t.ticketDetails}</h3>
-                <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
-                  {selectedEvent.isExternal ? (
-                    <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-3">
-                      <span className="text-xs text-slate-450 font-bold uppercase tracking-wide">Pendaftaran Eksternal</span>
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 bg-indigo-500/10 rounded-md border border-indigo-500/20">
-                        {selectedEvent.externalProvider || 'Eksternal'}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-3">
-                      <span className="text-sm text-slate-400 font-medium">{selectedEvent.ticketName || 'Standard Ticket'}</span>
-                      <span className="text-xs text-slate-550">x 1</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-slate-300">
-                      {selectedEvent.isExternal ? `Harga (via ${selectedEvent.externalProvider || 'Eventbrite'})` : 'Total'}
-                    </span>
-                    <span className="text-2xl font-black text-white">{selectedEvent.price}</span>
+
+            <div className="p-6">
+              <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{selectedEvent.title}</h1>
+              
+              <div className="bg-slate-50 dark:bg-slate-800/35 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/60 mb-6 space-y-4">
+                {/* Tanggal & Waktu */}
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
+                    <Calendar className="w-5 h-5" />
                   </div>
-                  {selectedEvent.isExternal && (
-                    <div className="text-[11px] text-slate-400 mt-2 border-t border-slate-750 pt-2 flex justify-between">
-                      <span>Kapasitas</span>
-                      <span className="font-bold text-slate-200">Cek di {selectedEvent.externalProvider || 'Eventbrite'}</span>
-                    </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Tanggal & Waktu</p>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug">{selectedEvent.date}</p>
+                    <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">{selectedEvent.time || '18:00 - 22:00'}</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-200/50 dark:border-slate-800/60 my-1"></div>
+
+                {/* Tombol Registrasi Tiket */}
+                <div className="py-1">
+                  {selectedEvent.isSalesClosed ? (
+                    <button 
+                      disabled
+                      className="w-full bg-slate-200 dark:bg-slate-850 text-slate-500 py-3.5 rounded-xl font-bold cursor-not-allowed text-sm text-center"
+                    >
+                      Ticket Sales Closed
+                    </button>
+                  ) : selectedEvent.isExternal ? (
+                    <a 
+                      href={selectedEvent.externalUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center cursor-pointer"
+                    >
+                      Beli Tiket di {selectedEvent.externalProvider || 'Tiket.com'}
+                    </a>
+                  ) : (
+                    <button 
+                      onClick={() => {
+                        if (currentUser && selectedEvent.organizerId === currentUser.id) {
+                          setToast({ message: "Organizers are not allowed to purchase tickets for their own events.", show: true });
+                          setTimeout(() => setToast({ message: '', show: false }), 4000);
+                          return;
+                        }
+                        handleGoToCheckoutDetails();
+                      }}
+                      className="w-full bg-indigo-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-700 active:scale-95 transition-all text-sm cursor-pointer"
+                    >
+                      {t.getTickets}
+                    </button>
                   )}
                 </div>
-                
-                <div className="mt-auto pt-4">
-                  <div className="flex gap-3 mb-3">
-                    {selectedEvent.isSalesClosed ? (
-                      <button 
-                        disabled
-                        className="flex-grow bg-slate-800 text-slate-500 py-3.5 rounded-xl font-bold cursor-not-allowed text-sm"
-                      >
-                        Ticket Sales Closed
-                      </button>
-                    ) : selectedEvent.isExternal ? (
-                      <a 
-                        href={selectedEvent.externalUrl || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-grow text-center bg-indigo-500 hover:bg-indigo-400 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center"
-                      >
-                        Beli Tiket di {selectedEvent.externalProvider || 'Tiket.com'}
-                      </a>
-                    ) : (
-                      <button 
-                        onClick={() => {
-                          if (currentUser && selectedEvent.organizerId === currentUser.id) {
-                            setToast({ message: "Organizers are not allowed to purchase tickets for their own events.", show: true });
-                            setTimeout(() => setToast({ message: '', show: false }), 4000);
-                            return;
-                          }
-                          handleGoToCheckoutDetails();
-                        }}
-                        className="flex-grow bg-indigo-500 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-indigo-400 active:scale-95 transition-all text-sm"
-                      >
-                        {t.getTickets}
-                      </button>
-                    )}
-                    {!(isAuthenticated && selectedEvent.organizerId === (currentUser?.preferences?.joinedTeamOf || currentUser?.id)) && (
-                      <button 
-                        onClick={() => handleToggleSave(selectedEvent.id)}
-                        className="bg-slate-800 border border-slate-700 text-slate-300 p-3.5 rounded-xl font-bold hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer"
-                        title={savedEventIds.includes(selectedEvent.id) ? "Saved to wishlist" : "Save for later"}
-                      >
-                        <Bookmark className={`w-5 h-5 ${savedEventIds.includes(selectedEvent.id) ? "fill-indigo-400 text-indigo-400" : "text-slate-400"}`} />
-                      </button>
-                    )}
+
+                <div className="border-t border-slate-200/50 dark:border-slate-800/60 my-1"></div>
+
+                {/* Lokasi */}
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl shrink-0">
+                    <MapPin className="w-5 h-5" />
                   </div>
-                   <button 
-                    onClick={() => {
-                      if (view === 'ticket-preview') {
-                        setView(previousView || 'landing');
-                      } else {
-                        setCheckoutModal(null);
-                      }
-                    }} 
-                    className="w-full bg-slate-800 border border-slate-700 text-slate-300 px-6 py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors"
-                  >
-                      Back to previous page
-                  </button>
-                  <p className="text-center text-[10px] text-slate-500 mt-2">Secure checkout</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Lokasi</p>
+                    <p className="font-bold text-sm text-slate-900 dark:text-white leading-snug break-words">
+                      {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Online' : selectedEvent.location}
+                    </p>
+                    <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">
+                      {selectedEvent.type === 'online' || selectedEvent.location.toLowerCase().includes('online') ? 'Akses Virtual' : 'Indonesia'}
+                    </p>
+                  </div>
                 </div>
               </div>
+
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">{t.overview}</h3>
+              <div className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+                {description.length > 180 ? (
+                  <>
+                    {isOverviewExpanded ? description : `${description.slice(0, 180)}... `}
+                    <button 
+                      onClick={() => setIsOverviewExpanded(!isOverviewExpanded)}
+                      className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline ml-1 focus:outline-none cursor-pointer"
+                    >
+                      {isOverviewExpanded ? 'Read Less' : 'Read More'}
+                    </button>
+                  </>
+                ) : (
+                  description
+                )}
+              </div>
+
+              {/* Back Button */}
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+                <button 
+                  onClick={() => {
+                    if (view === 'ticket-preview') {
+                      setView(previousView || 'landing');
+                    } else {
+                      setCheckoutModal(null);
+                    }
+                  }} 
+                  className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold transition-all text-xs flex items-center gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Kembali ke halaman sebelumnya
+                </button>
+              </div>
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
     );
   };
