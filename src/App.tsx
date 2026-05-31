@@ -3344,14 +3344,6 @@ export default function App() {
                 </div>
               </div>
             </div>
-
-            {/* Overview Card (Separated) */}
-            <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-100 dark:border-slate-800">
-              <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t.overview}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
-                {selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}. This event will feature industry leaders, engaging activities, and ample networking opportunities to propel you forward.`}
-              </p>
-            </div>
           </motion.div>
           
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-[35%] flex flex-col md:self-start h-fit">
@@ -3445,6 +3437,14 @@ export default function App() {
               </div>
             </div>
           </motion.div>
+        </div>
+
+        {/* Row 2: Overview (Melebar / Full Width, Unwrapped) */}
+        <div className="w-full mt-10 mb-16">
+          <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">{t.overview}</h3>
+          <p className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+            {selectedEvent.fullDescription || selectedEvent.description || `Join us for an unforgettable experience at ${selectedEvent.title}.`}
+          </p>
         </div>
       </div>
     );
