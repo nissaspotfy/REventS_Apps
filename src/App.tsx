@@ -2046,27 +2046,6 @@ export default function App() {
   };
 
   const handleGetTickets = (event: any) => {
-    if (event.isExternal) {
-      setSelectedEvent(event);
-      setRedirectingEvent(event);
-      setRedirectProgress(0);
-      if (redirectIntervalRef.current) {
-        clearInterval(redirectIntervalRef.current);
-      }
-      
-      let progress = 0;
-      redirectIntervalRef.current = setInterval(() => {
-        progress += 5;
-        setRedirectProgress(progress);
-        if (progress >= 100) {
-          clearInterval(redirectIntervalRef.current);
-          window.open(event.externalUrl || '#', '_blank');
-          setRedirectingEvent(null);
-        }
-      }, 80); // 80ms * 20 = 1.6 seconds total
-      return;
-    }
-
     setSelectedEvent(event);
     setPreviousView(view);
     setCheckoutModal('preview');
@@ -3356,12 +3335,26 @@ export default function App() {
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
                   <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-3">
                     <span className="text-sm text-slate-400 font-medium">{selectedEvent.ticketName || 'Standard Ticket'}</span>
-                    <span className="text-xs text-slate-500">x 1</span>
+                    {selectedEvent.isExternal ? (
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400 px-2 py-0.5 bg-indigo-500/10 rounded-md border border-indigo-500/20">
+                        {selectedEvent.externalProvider || 'Eksternal'}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-550">x 1</span>
+                    )}
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-slate-300">Total</span>
+                    <span className="text-sm font-bold text-slate-300">
+                      {selectedEvent.isExternal ? 'Estimasi Harga' : 'Total'}
+                    </span>
                     <span className="text-2xl font-black text-white">{selectedEvent.price}</span>
                   </div>
+                  {selectedEvent.isExternal && selectedEvent.capacity && (
+                    <div className="text-[11px] text-slate-400 mt-2 border-t border-slate-750 pt-2 flex justify-between">
+                      <span>Kapasitas Quota</span>
+                      <span className="font-bold text-slate-200">{selectedEvent.capacity}</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex gap-3 mb-3">
@@ -3372,6 +3365,15 @@ export default function App() {
                     >
                       Ticket Sales Closed
                     </button>
+                  ) : selectedEvent.isExternal ? (
+                    <a 
+                      href={selectedEvent.externalUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-grow text-center bg-indigo-500 hover:bg-indigo-400 text-white py-3.5 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all text-sm flex items-center justify-center"
+                    >
+                      Beli Tiket di {selectedEvent.externalProvider || 'Tiket.com'}
+                    </a>
                   ) : (
                     <button 
                       onClick={() => {
@@ -7044,9 +7046,9 @@ export default function App() {
                           </button>
                         </div>
 
-                        {eventIsExternal ? (
-                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                          {eventIsExternal && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-slate-200 dark:border-slate-700/50">
                               <div>
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Provider Eksternal <span className="text-red-500">*</span></label>
                                 <input 
@@ -7068,59 +7070,38 @@ export default function App() {
                                 />
                               </div>
                             </div>
-                            
+                          )}
+                          
+                          <div className="space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenis Tiket Tampilan <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
+                                <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Type <span className="text-red-500">*</span></label>
                                 <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
                                   <option value="paid">Paid</option>
                                   <option value="free">Free</option>
                                 </select>
                               </div>
-                              {ticketType !== 'free' && (
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Harga Tiket Tampilan (IDR)</label>
-                                  <div className="relative">
-                                    <span className="absolute left-4 top-3 text-slate-550 font-bold">Rp</span>
-                                    <input type="number" placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                  </div>
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        ) : (
-                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
-                                  <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Type <span className="text-red-500">*</span></label>
-                                  <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
-                                    <option value="paid">Paid</option>
-                                    <option value="free">Free</option>
-                                  </select>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Price (IDR)</label>
+                                <div className="relative">
+                                  <span className="absolute left-4 top-3 text-slate-550 font-bold">Rp</span>
+                                  <input type="number" disabled={ticketType === 'free'} placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className={`w-full pl-12 pr-4 py-3 rounded-xl border ${ticketType === 'free' ? 'bg-slate-100 dark:bg-slate-900 border-transparent text-slate-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white'} focus:ring-2 focus:ring-indigo-500 outline-none`} />
                                 </div>
                               </div>
-                              
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Price (IDR)</label>
-                                  <div className="relative">
-                                    <span className="absolute left-4 top-3 text-slate-550 font-bold">Rp</span>
-                                    <input type="number" disabled={ticketType === 'free'} placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className={`w-full pl-12 pr-4 py-3 rounded-xl border ${ticketType === 'free' ? 'bg-slate-100 dark:bg-slate-900 border-transparent text-slate-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white'} focus:ring-2 focus:ring-indigo-500 outline-none`} />
-                                  </div>
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
-                                  <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                </div>
+                              <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
+                                <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
                               </div>
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
 
                       <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 justify-end">
