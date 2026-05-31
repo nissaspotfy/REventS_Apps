@@ -430,50 +430,6 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    const isModalOpen = !!(
-      checkoutModal ||
-      showGoogleAccounts ||
-      showForgotPassword ||
-      showResetPassword ||
-      showTicketModal ||
-      showRefundModal ||
-      showSavedEventModal ||
-      showInterestModal ||
-      showDuplicateEmailModal ||
-      selectedScrapbookTicket ||
-      redirectingEvent ||
-      showMidtransSnap ||
-      view === 'create-event' ||
-      isGlobalLoading
-    );
-
-    if (isModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [
-    checkoutModal,
-    showGoogleAccounts,
-    showForgotPassword,
-    showResetPassword,
-    showTicketModal,
-    showRefundModal,
-    showSavedEventModal,
-    showInterestModal,
-    showDuplicateEmailModal,
-    selectedScrapbookTicket,
-    redirectingEvent,
-    showMidtransSnap,
-    view,
-    isGlobalLoading
-  ]);
-
-  React.useEffect(() => {
     if (!showMidtransSnap) return;
     let seconds = 900; // 15 mins
     const interval = setInterval(() => {
@@ -2028,6 +1984,50 @@ export default function App() {
   const [eventIsExternal, setEventIsExternal] = useState(false);
   const [eventExternalUrl, setEventExternalUrl] = useState('');
   const [eventExternalProvider, setEventExternalProvider] = useState('');
+
+  React.useEffect(() => {
+    const isModalOpen = !!(
+      checkoutModal ||
+      showGoogleAccounts ||
+      showForgotPassword ||
+      showResetPassword ||
+      showTicketModal ||
+      showRefundModal ||
+      showSavedEventModal ||
+      showInterestModal ||
+      showDuplicateEmailModal ||
+      selectedScrapbookTicket ||
+      redirectingEvent ||
+      showMidtransSnap ||
+      view === 'create-event' ||
+      isGlobalLoading
+    );
+
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [
+    checkoutModal,
+    showGoogleAccounts,
+    showForgotPassword,
+    showResetPassword,
+    showTicketModal,
+    showRefundModal,
+    showSavedEventModal,
+    showInterestModal,
+    showDuplicateEmailModal,
+    selectedScrapbookTicket,
+    redirectingEvent,
+    showMidtransSnap,
+    view,
+    isGlobalLoading
+  ]);
 
   const clearCopilotState = () => {
     setCopilotInput('');
