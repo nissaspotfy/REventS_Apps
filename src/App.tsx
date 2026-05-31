@@ -318,17 +318,6 @@ export default function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  React.useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (view === 'create-event' && editingEventId !== null) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [view, editingEventId]);
   const [organizerTab, setOrganizerTab] = useState('dashboard');
   const [publishedEventsTab, setPublishedEventsTab] = useState<'published' | 'drafts' | 'past'>('published');
   const [managingEvent, setManagingEvent] = useState<any>(null);
@@ -477,6 +466,18 @@ export default function App() {
     }
     setViewInternal(newView);
   };
+
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (view === 'create-event' && editingEventId !== null) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [view, editingEventId]);
+
   const [provideCertificate, setProvideCertificate] = useState(false);
   const [distributingCertificates, setDistributingCertificates] = useState(false);
 
