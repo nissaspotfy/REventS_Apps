@@ -7020,7 +7020,108 @@ export default function App() {
                         </div>
                       </div>
 
+                      <hr className="border-slate-100 dark:border-slate-800" />
 
+                      {/* 4. Ticket Configuration */}
+                      <div>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">Ticket Settings</h3>
+                        
+                        {/* External Event Toggle */}
+                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800 mb-4">
+                          <div className="text-left">
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">Event Eksternal (Aggregator Mode)</span>
+                            <p className="text-xs text-slate-550 dark:text-slate-400 mt-0.5">
+                              Aktifkan jika pendaftaran tiket dilakukan melalui platform eksternal (seperti Loket.com, Eventbrite, Klook, dsb).
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setEventIsExternal(!eventIsExternal)}
+                            className={`w-12 h-6 rounded-full transition-colors relative flex items-center shrink-0 ${eventIsExternal ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-650'}`}
+                          >
+                            <span className="sr-only">Toggle Event Eksternal</span>
+                            <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${eventIsExternal ? 'left-7' : 'left-1'}`} />
+                          </button>
+                        </div>
+
+                        {eventIsExternal ? (
+                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nama Provider Eksternal <span className="text-red-500">*</span></label>
+                                <input 
+                                  type="text" 
+                                  placeholder="e.g. Loket.com, Eventbrite, Klook" 
+                                  value={eventExternalProvider} 
+                                  onChange={e => setEventExternalProvider(e.target.value)} 
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tautan Pendaftaran (URL) <span className="text-red-500">*</span></label>
+                                <input 
+                                  type="url" 
+                                  placeholder="https://" 
+                                  value={eventExternalUrl} 
+                                  onChange={e => setEventExternalUrl(e.target.value)} 
+                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Jenis Tiket Tampilan <span className="text-red-500">*</span></label>
+                                <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                                  <option value="paid">Paid</option>
+                                  <option value="free">Free</option>
+                                </select>
+                              </div>
+                              {ticketType !== 'free' && (
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Harga Tiket Tampilan (IDR)</label>
+                                  <div className="relative">
+                                    <span className="absolute left-4 top-3 text-slate-550 font-bold">Rp</span>
+                                    <input type="number" placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Name <span className="text-red-500">*</span></label>
+                                  <input type="text" placeholder="e.g. VIP, Presale 1, Early Bird" value={eventTicketName} onChange={e => setEventTicketName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Type <span className="text-red-500">*</span></label>
+                                  <select value={ticketType} onChange={(e) => setTicketType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
+                                    <option value="paid">Paid</option>
+                                    <option value="free">Free</option>
+                                  </select>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Ticket Price (IDR)</label>
+                                  <div className="relative">
+                                    <span className="absolute left-4 top-3 text-slate-550 font-bold">Rp</span>
+                                    <input type="number" disabled={ticketType === 'free'} placeholder="0" value={eventPrice} onChange={e => setEventPrice(e.target.value)} className={`w-full pl-12 pr-4 py-3 rounded-xl border ${ticketType === 'free' ? 'bg-slate-100 dark:bg-slate-900 border-transparent text-slate-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 dark:text-white'} focus:ring-2 focus:ring-indigo-500 outline-none`} />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Capacity (Quota/Stock) <span className="text-red-500">*</span></label>
+                                  <input type="number" placeholder="e.g. 100" value={eventCapacity} onChange={e => setEventCapacity(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-4 justify-end">
                         {!(editingEventId && events.find(e => e.id === editingEventId)?.status === 'active') && (
