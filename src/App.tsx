@@ -3349,8 +3349,8 @@ export default function App() {
             </div>
           </motion.div>
           
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-2/5 flex flex-col">
-            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col relative overflow-hidden">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full md:w-2/5 flex flex-col md:self-start h-fit">
+            <div className="bg-slate-900 dark:bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800 w-full flex flex-col h-fit relative overflow-hidden">
               <div className="absolute -top-10 -right-10 opacity-5"><Ticket className="w-48 h-48" /></div>
               <div className="relative z-10 text-white">
                 <h3 className="text-xl font-black mb-6">{t.ticketDetails}</h3>
