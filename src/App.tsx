@@ -1963,24 +1963,38 @@ export default function App() {
       return;
     }
     
+    // Safety timeout to release UI lock in case of unexpected errors
+    const safetyTimeout = setTimeout(() => {
+      setIsDownloading(false);
+      setToast({ message: "Ticket download request processed.", show: true });
+      setTimeout(() => setToast({ message: "", show: false }), 3000);
+    }, 6000);
+
     const opt = {
       margin:       [0.2, 0.2, 0.2, 0.2],
       filename:     `ticket-${selectedEvent?.title?.replace(/\s+/g, '-').toLowerCase() || 'ticket'}-${Date.now()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      html2canvas:  { scale: 2, useCORS: true, allowTaint: true, logging: false },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
     if ((window as any).html2pdf) {
       (window as any).html2pdf().set(opt).from(element).save()
         .then(() => {
+          clearTimeout(safetyTimeout);
           setIsDownloading(false);
+          setToast({ message: "Ticket PDF downloaded successfully!", show: true });
+          setTimeout(() => setToast({ message: "", show: false }), 4000);
         })
         .catch((err: any) => {
+          clearTimeout(safetyTimeout);
           console.error("PDF generation failed:", err);
           setIsDownloading(false);
+          setToast({ message: "PDF generation failed. Please try again.", show: true });
+          setTimeout(() => setToast({ message: "", show: false }), 4000);
         });
     } else {
+      clearTimeout(safetyTimeout);
       alert("Generating PDF ticket...");
       setIsDownloading(false);
     }
@@ -4419,6 +4433,7 @@ export default function App() {
                   <img 
                     src={selectedEvent.image} 
                     alt="" 
+                    crossOrigin="anonymous"
                     className="w-full h-full object-cover absolute inset-0" 
                   />
                   <div className="absolute top-3 left-3 z-10">
@@ -4492,7 +4507,7 @@ export default function App() {
 
                   {/* QR Code */}
                   <div className="w-32 h-32 bg-white p-2 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
-                    <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain" />
+                    <img src={qrUrl} alt="QR Code" crossOrigin="anonymous" className="w-full h-full object-contain" />
                   </div>
                   <div className="mt-3.5 text-center">
                     <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">PASS CODE</span>
