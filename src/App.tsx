@@ -3389,7 +3389,7 @@ export default function App() {
                     setCheckoutModal(null);
                   }
                 }}
-                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-750 dark:text-slate-200 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-30"
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-800 p-2.5 rounded-full backdrop-blur-sm transition-all shadow-md hover:scale-105 active:scale-95 border border-white/20 flex items-center justify-center cursor-pointer z-30"
                 title="Close"
               >
                 <X className="w-5 h-5" />
@@ -4308,6 +4308,272 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+    );
+  };
+
+  const TicketSuccessView = () => {
+    if (!selectedEvent) return null;
+
+    const tickets = purchasedTickets.length ? purchasedTickets : (purchasedTicket ? [purchasedTicket] : []);
+    const isFreeEvent = !selectedEvent.price || selectedEvent.price.toLowerCase() === 'free' || selectedEvent.price.replace(/[^0-9]/g, '') === '0';
+
+    const [hasAutoDownloaded, setHasAutoDownloaded] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownloadPDF = () => {
+      if (isDownloading) return;
+      setIsDownloading(true);
+      const element = document.getElementById('ticket-download-container');
+      if (!element) {
+        setIsDownloading(false);
+        return;
+      }
+      
+      const opt = {
+        margin:       [0.2, 0.2, 0.2, 0.2],
+        filename:     `ticket-${selectedEvent.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      if ((window as any).html2pdf) {
+        (window as any).html2pdf().set(opt).from(element).save()
+          .then(() => {
+            setIsDownloading(false);
+          })
+          .catch((err: any) => {
+            console.error("PDF generation failed:", err);
+            setIsDownloading(false);
+          });
+      } else {
+        alert("Generating PDF ticket...");
+        setIsDownloading(false);
+      }
+    };
+
+    useEffect(() => {
+      if (tickets.length > 0 && !hasAutoDownloaded) {
+        setHasAutoDownloaded(true);
+        const timer = setTimeout(() => {
+          handleDownloadPDF();
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }, [tickets, hasAutoDownloaded]);
+
+    const handleDone = () => {
+      setIsRegistrationComplete(false);
+      setPurchasedTicket(null);
+      setPurchasedTickets([]);
+      setCheckoutModal(null);
+      setShowMidtransSnap(false);
+      setPaymentMethod('');
+      
+      if (isAuthenticated) {
+        setView('dashboard');
+        setRole('audience');
+        setAudienceTab('myTickets');
+        setMyTicketsTab('active');
+      } else {
+        setView('landing');
+      }
+    };
+
+    return (
+      <div className="max-w-4xl mx-auto space-y-8 animate-scale-in py-8 px-4 text-left">
+        <div className="text-center space-y-2 text-white">
+          <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-400/50 mb-3 animate-bounce">
+            <Check className="w-9 h-9 stroke-[3]" />
+          </div>
+          <h2 className="text-3xl font-black tracking-tight">Payment Successful!</h2>
+          <p className="text-slate-300 text-sm max-w-md mx-auto">
+            Your ticket(s) are ready. We have also sent a copy of your ticket(s) to <span className="font-semibold text-indigo-300">{checkoutEmail}</span>.
+          </p>
+        </div>
+
+        {/* DevFest Ticket Card Container */}
+        <div id="ticket-download-container" className="space-y-6 bg-transparent p-1">
+          {tickets.map((t: any, idx: number) => {
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}`;
+            return (
+              <div 
+                key={t.id} 
+                className="bg-white text-slate-800 rounded-[24px] shadow-2xl border border-slate-200 overflow-hidden flex flex-col md:flex-row relative w-full select-none"
+                style={{ 
+                  breakAfter: 'page', 
+                  pageBreakAfter: 'always',
+                  borderRadius: '24px'
+                }}
+              >
+                {/* Desktop top cutout circle */}
+                <div className="absolute -top-3 left-[75%] -translate-x-1/2 w-6 h-6 rounded-full bg-slate-900 border border-slate-200/20 hidden md:block z-10"></div>
+                {/* Desktop bottom cutout circle */}
+                <div className="absolute -bottom-3 left-[75%] -translate-x-1/2 w-6 h-6 rounded-full bg-slate-900 border border-slate-200/20 hidden md:block z-10"></div>
+
+                {/* Left Section (Cover Image) */}
+                <div className="md:w-1/4 relative bg-slate-900 overflow-hidden flex-shrink-0 flex items-center justify-center min-h-[140px] md:min-h-[200px]">
+                  <img 
+                    src={selectedEvent.image} 
+                    alt="" 
+                    className="w-full h-full object-cover absolute inset-0" 
+                  />
+                  <div className="absolute top-3 left-3 z-10">
+                    <span className="bg-indigo-600 text-white font-extrabold px-2.5 py-0.5 rounded-md text-[10px] uppercase tracking-wider">
+                      {selectedEvent.category}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Middle Section (Details) */}
+                <div className="flex-grow p-6 md:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-dashed border-slate-200 relative">
+                  <div className="space-y-4">
+                    {/* Top labels */}
+                    <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">GDG DEVFEST EST. PASS</span>
+                      <span>PASS #{idx + 1} OF {tickets.length}</span>
+                    </div>
+
+                    {/* Event Title */}
+                    <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-tight">
+                      {selectedEvent.title}
+                    </h3>
+
+                    {/* Detail Grid */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 pt-2">
+                      <div>
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">TANGGAL & WAKTU</span>
+                        <span className="text-[11px] font-extrabold text-slate-700 block mt-0.5">
+                          {selectedEvent.date}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">PEMBELI / ATTENDEE</span>
+                        <span className="text-[11px] font-extrabold text-slate-700 block mt-0.5 break-all">
+                          {t.fullName || 'Guest'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">BERLAKU PADA</span>
+                        <span className="text-[11px] font-extrabold text-emerald-600 block mt-0.5">
+                          Berlaku pada {selectedEvent.date.split(',').pop()?.trim() || selectedEvent.date}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">CATEGORY</span>
+                        <span className="text-[11px] font-extrabold text-slate-700 block mt-0.5">
+                          {t.audienceCategory || 'General Public'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">PRICE</span>
+                        <span className="text-[11px] font-extrabold text-slate-700 block mt-0.5">
+                          {isFreeEvent ? 'Free' : (t.price || selectedEvent.price)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider">TICKET ID</span>
+                        <span className="text-[11px] font-extrabold text-indigo-600 block mt-0.5 font-mono">
+                          {t.qrCode}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Section (QR Code) */}
+                <div className="md:w-1/4 p-6 md:p-8 flex flex-col justify-center items-center bg-slate-50/50 flex-shrink-0 relative">
+                  {/* Semicircle cutouts for mobile screen on top/bottom edges of the dotted separator */}
+                  <div className="absolute top-[-8px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-slate-900 md:hidden"></div>
+                  <div className="absolute bottom-[-8px] left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-slate-900 md:hidden"></div>
+
+                  {/* QR Code */}
+                  <div className="w-32 h-32 bg-white p-2 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+                    <img src={qrUrl} alt="QR Code" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="mt-3.5 text-center">
+                    <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest">PASS CODE</span>
+                    <span className="inline-block mt-1 px-3 py-1 bg-white border border-slate-200 rounded text-[10px] font-mono font-bold text-slate-600 shadow-sm">
+                      {t.qrCode}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Order Information Section */}
+          <div className="bg-white rounded-[24px] p-6 md:p-8 border border-slate-200 shadow-xl space-y-6" style={{ borderRadius: '24px' }}>
+            <h3 className="text-lg font-black text-slate-900 border-b border-slate-100 pb-3">
+              Order Information
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">NAMA ACARA</span>
+                  <span className="font-extrabold text-slate-800 block mt-1">{selectedEvent.title}</span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">BUYER CONTACT (NAMA)</span>
+                  <span className="font-extrabold text-slate-800 block mt-1">{tickets[0]?.fullName || 'Guest'}</span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">TICKET TYPE</span>
+                  <span className="font-extrabold text-slate-800 block mt-1 font-semibold">
+                    {isFreeEvent ? 'Free Access / RSVP' : `${selectedEvent.ticketType || 'Onsite Premium Pass'} (${isFreeEvent ? 'Free' : selectedEvent.price})`}
+                  </span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">BUYER EMAIL</span>
+                  <span className="font-extrabold text-slate-800 block mt-1 break-all">{tickets[0]?.email || checkoutEmail}</span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">LOCATION VENUE</span>
+                  <span className="font-extrabold text-slate-800 block mt-1">{selectedEvent.location}</span>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">TOTAL PASS QUANTITY</span>
+                  <span className="font-extrabold text-slate-800 block mt-1">{tickets.length} Ticket(s)</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="w-24 h-24 bg-white p-2 rounded-xl border border-slate-200 flex-shrink-0 flex items-center justify-center">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${tickets[0]?.qrCode || 'REVENT-TIX-GLOBAL'}`} 
+                    alt="Global Order QR Code" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px]">ORDER QR-BARCODE</span>
+                  <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    Gunakan QR Code global pesanan ini untuk check-in rombongan di meja registrasi, atau gunakan kode individual yang tertera langsung pada masing-masing kartu tiket di atas.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 max-w-md mx-auto text-center">
+          <button
+            onClick={handleDownloadPDF}
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white font-extrabold rounded-2xl transition-all text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Ticket className="w-5 h-5" />
+            {isDownloading ? 'Mengunduh PDF...' : 'Unduh Tiket ke Galeri (PDF)'}
+          </button>
+          <button
+            onClick={handleDone}
+            className="w-full py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-extrabold rounded-2xl transition-all text-sm shadow-md flex items-center justify-center cursor-pointer"
+          >
+            {isAuthenticated ? 'Go to Dashboard' : 'Ke Beranda'}
+          </button>
+        </div>
       </div>
     );
   };
@@ -7724,9 +7990,13 @@ export default function App() {
                  exit={{ scale: 0.95, y: 20 }} 
                  className="bg-transparent max-w-6xl w-full relative my-auto outline-none border-none"
                >
-                 {checkoutModal === 'preview' && TicketPreviewView()}
-                 {checkoutModal === 'details' && CheckoutDetailsView()}
-                 {checkoutModal === 'checkout' && CheckoutView()}
+                 {(purchasedTicket || isRegistrationComplete) ? TicketSuccessView() : (
+                   <>
+                     {checkoutModal === 'preview' && TicketPreviewView()}
+                     {checkoutModal === 'details' && CheckoutDetailsView()}
+                     {checkoutModal === 'checkout' && CheckoutView()}
+                   </>
+                 )}
                </motion.div>
             </motion.div>
           )}
