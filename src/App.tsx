@@ -1974,7 +1974,7 @@ export default function App() {
       margin:       [0.2, 0.2, 0.2, 0.2],
       filename:     `ticket-${selectedEvent?.title?.replace(/\s+/g, '-').toLowerCase() || 'ticket'}-${Date.now()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, allowTaint: true, logging: false },
+      html2canvas:  { scale: 2, useCORS: true, allowTaint: false, logging: false },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
@@ -2010,6 +2010,26 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [purchasedTickets, purchasedTicket, isRegistrationComplete, hasAutoDownloaded, selectedEvent]);
+
+  // Clean up any scrolling lock or stray DOM elements left by html2pdf if/when download stops/fails
+  useEffect(() => {
+    if (!isDownloading) {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      
+      // Also restore the overlay's scrolling capability in case html2pdf touched it
+      const overlay = document.querySelector('.fixed.inset-0.z-50');
+      if (overlay) {
+        (overlay as HTMLElement).style.overflowY = 'auto';
+        (overlay as HTMLElement).style.overflow = 'auto';
+      }
+      
+      const strays = document.querySelectorAll('.html2pdf__container, .html2pdf__page');
+      strays.forEach(el => el.remove());
+    }
+  }, [isDownloading]);
 
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -4412,7 +4432,8 @@ export default function App() {
         {/* DevFest Ticket Card Container */}
         <div id="ticket-download-container" className="space-y-6 bg-transparent p-1">
           {tickets.map((t: any, idx: number) => {
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}&t=${Date.now()}-${idx}`;
+            const eventImageUrl = selectedEvent.image ? (selectedEvent.image.includes('?') ? `${selectedEvent.image}&t=${Date.now()}` : `${selectedEvent.image}?t=${Date.now()}`) : '';
             return (
               <div 
                 key={t.id} 
@@ -4431,7 +4452,7 @@ export default function App() {
                 {/* Left Section (Cover Image) */}
                 <div className="md:w-1/4 relative bg-slate-900 overflow-hidden flex-shrink-0 flex items-center justify-center min-h-[140px] md:min-h-[200px]">
                   <img 
-                    src={selectedEvent.image} 
+                    src={eventImageUrl} 
                     alt="" 
                     crossOrigin="anonymous"
                     className="w-full h-full object-cover absolute inset-0" 
