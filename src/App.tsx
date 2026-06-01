@@ -4433,7 +4433,7 @@ export default function App() {
                   <div className="space-y-4">
                     {/* Top labels */}
                     <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">GDG DEVFEST EST. PASS</span>
+                      <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">REventS Pass</span>
                       <span>PASS #{idx + 1} OF {tickets.length}</span>
                     </div>
 
@@ -4511,50 +4511,32 @@ export default function App() {
               Order Information
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div>
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">NAMA ACARA</span>
-                  <span className="font-extrabold text-slate-800 block mt-1">{selectedEvent.title}</span>
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">BUYER CONTACT (NAMA)</span>
-                  <span className="font-extrabold text-slate-800 block mt-1">{tickets[0]?.fullName || 'Guest'}</span>
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">TICKET TYPE</span>
-                  <span className="font-extrabold text-slate-800 block mt-1 font-semibold">
-                    {isFreeEvent ? 'Free Access / RSVP' : `${selectedEvent.ticketType || 'Onsite Premium Pass'} (${isFreeEvent ? 'Free' : selectedEvent.price})`}
-                  </span>
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">BUYER EMAIL</span>
-                  <span className="font-extrabold text-slate-800 block mt-1 break-all">{tickets[0]?.email || checkoutEmail}</span>
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">LOCATION VENUE</span>
-                  <span className="font-extrabold text-slate-800 block mt-1">{selectedEvent.location}</span>
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">TOTAL PASS QUANTITY</span>
-                  <span className="font-extrabold text-slate-800 block mt-1">{tickets.length} Ticket(s)</span>
-                </div>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">NAMA ACARA</span>
+                <span className="font-extrabold text-slate-800 block mt-1">{selectedEvent.title}</span>
               </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <div className="w-24 h-24 bg-white p-2 rounded-xl border border-slate-200 flex-shrink-0 flex items-center justify-center">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${tickets[0]?.qrCode || 'REVENT-TIX-GLOBAL'}`} 
-                    alt="Global Order QR Code" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px]">ORDER QR-BARCODE</span>
-                  <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                    Gunakan QR Code global pesanan ini untuk check-in rombongan di meja registrasi, atau gunakan kode individual yang tertera langsung pada masing-masing kartu tiket di atas.
-                  </p>
-                </div>
+              <div>
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">BUYER CONTACT (NAMA)</span>
+                <span className="font-extrabold text-slate-800 block mt-1">{tickets[0]?.fullName || 'Guest'}</span>
+              </div>
+              <div>
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">TICKET TYPE</span>
+                <span className="font-extrabold text-slate-800 block mt-1 font-semibold">
+                  {isFreeEvent ? 'Free Access / RSVP' : `${selectedEvent.ticketType || 'Onsite Premium Pass'} (${isFreeEvent ? 'Free' : selectedEvent.price})`}
+                </span>
+              </div>
+              <div>
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">BUYER EMAIL</span>
+                <span className="font-extrabold text-slate-800 block mt-1 break-all">{tickets[0]?.email || checkoutEmail}</span>
+              </div>
+              <div>
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">LOCATION VENUE</span>
+                <span className="font-extrabold text-slate-800 block mt-1">{selectedEvent.location}</span>
+              </div>
+              <div>
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[10px]">TOTAL PASS QUANTITY</span>
+                <span className="font-extrabold text-slate-800 block mt-1">{tickets.length} Ticket(s)</span>
               </div>
             </div>
           </div>
@@ -4567,7 +4549,7 @@ export default function App() {
             className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white font-extrabold rounded-2xl transition-all text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer"
           >
             <Ticket className="w-5 h-5" />
-            {isDownloading ? 'Mengunduh PDF...' : 'Unduh Tiket ke Galeri (PDF)'}
+            {isDownloading ? 'Downloading...' : 'Download Ticket'}
           </button>
           <button
             onClick={handleDone}
@@ -4576,6 +4558,15 @@ export default function App() {
             {isAuthenticated ? 'Go to Dashboard' : 'Ke Beranda'}
           </button>
         </div>
+
+        {/* Blocking Loading Overlay during PDF Download */}
+        {isDownloading && (
+          <div className="fixed inset-0 z-[999] bg-slate-950/60 backdrop-blur-sm flex flex-col items-center justify-center text-white pointer-events-auto">
+            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="font-extrabold text-lg">Downloading your ticket...</p>
+            <p className="text-slate-400 text-xs">Please wait, do not close or interact with the page.</p>
+          </div>
+        )}
       </div>
     );
   };
