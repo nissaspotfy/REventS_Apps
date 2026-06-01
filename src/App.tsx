@@ -1951,6 +1951,52 @@ export default function App() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pendingRSVP, setPendingRSVP] = useState<any>(null);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [hasAutoDownloaded, setHasAutoDownloaded] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPDF = () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    const element = document.getElementById('ticket-download-container');
+    if (!element) {
+      setIsDownloading(false);
+      return;
+    }
+    
+    const opt = {
+      margin:       [0.2, 0.2, 0.2, 0.2],
+      filename:     `ticket-${selectedEvent?.title?.replace(/\s+/g, '-').toLowerCase() || 'ticket'}-${Date.now()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    if ((window as any).html2pdf) {
+      (window as any).html2pdf().set(opt).from(element).save()
+        .then(() => {
+          setIsDownloading(false);
+        })
+        .catch((err: any) => {
+          console.error("PDF generation failed:", err);
+          setIsDownloading(false);
+        });
+    } else {
+      alert("Generating PDF ticket...");
+      setIsDownloading(false);
+    }
+  };
+
+  useEffect(() => {
+    const hasTickets = purchasedTickets.length > 0 || purchasedTicket !== null;
+    if (hasTickets && (purchasedTicket || isRegistrationComplete) && !hasAutoDownloaded) {
+      setHasAutoDownloaded(true);
+      const timer = setTimeout(() => {
+        handleDownloadPDF();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [purchasedTickets, purchasedTicket, isRegistrationComplete, hasAutoDownloaded, selectedEvent]);
+
   const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileName, setProfileName] = useState('John Smith');
@@ -4318,51 +4364,6 @@ export default function App() {
     const tickets = purchasedTickets.length ? purchasedTickets : (purchasedTicket ? [purchasedTicket] : []);
     const isFreeEvent = !selectedEvent.price || selectedEvent.price.toLowerCase() === 'free' || selectedEvent.price.replace(/[^0-9]/g, '') === '0';
 
-    const [hasAutoDownloaded, setHasAutoDownloaded] = useState(false);
-    const [isDownloading, setIsDownloading] = useState(false);
-
-    const handleDownloadPDF = () => {
-      if (isDownloading) return;
-      setIsDownloading(true);
-      const element = document.getElementById('ticket-download-container');
-      if (!element) {
-        setIsDownloading(false);
-        return;
-      }
-      
-      const opt = {
-        margin:       [0.2, 0.2, 0.2, 0.2],
-        filename:     `ticket-${selectedEvent.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-
-      if ((window as any).html2pdf) {
-        (window as any).html2pdf().set(opt).from(element).save()
-          .then(() => {
-            setIsDownloading(false);
-          })
-          .catch((err: any) => {
-            console.error("PDF generation failed:", err);
-            setIsDownloading(false);
-          });
-      } else {
-        alert("Generating PDF ticket...");
-        setIsDownloading(false);
-      }
-    };
-
-    useEffect(() => {
-      if (tickets.length > 0 && !hasAutoDownloaded) {
-        setHasAutoDownloaded(true);
-        const timer = setTimeout(() => {
-          handleDownloadPDF();
-        }, 1500);
-        return () => clearTimeout(timer);
-      }
-    }, [tickets, hasAutoDownloaded]);
-
     const handleDone = () => {
       setIsRegistrationComplete(false);
       setPurchasedTicket(null);
@@ -4370,6 +4371,7 @@ export default function App() {
       setCheckoutModal(null);
       setShowMidtransSnap(false);
       setPaymentMethod('');
+      setHasAutoDownloaded(false);
       
       if (isAuthenticated) {
         setView('dashboard');
