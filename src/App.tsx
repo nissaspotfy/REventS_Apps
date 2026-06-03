@@ -1954,6 +1954,28 @@ export default function App() {
   const [hasAutoDownloaded, setHasAutoDownloaded] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const cleanupHtml2Pdf = () => {
+    const strays = document.querySelectorAll('.html2pdf__container, .html2pdf__page');
+    strays.forEach(el => el.remove());
+    
+    document.documentElement.style.overflow = '';
+    document.documentElement.style.position = '';
+    document.documentElement.style.width = '';
+    document.documentElement.style.height = '';
+    
+    document.body.style.overflow = checkoutModal ? 'hidden' : '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.height = '';
+    
+    const overlay = document.querySelector('.fixed.inset-0.z-50');
+    if (overlay) {
+      (overlay as HTMLElement).style.overflowY = 'auto';
+      (overlay as HTMLElement).style.overflow = 'auto';
+      (overlay as HTMLElement).style.pointerEvents = 'auto';
+    }
+  };
+
   const handleDownloadPDF = () => {
     if (isDownloading) return;
     setIsDownloading(true);
@@ -1966,6 +1988,7 @@ export default function App() {
     // Safety timeout to release UI lock in case of unexpected errors
     const safetyTimeout = setTimeout(() => {
       setIsDownloading(false);
+      cleanupHtml2Pdf();
       setToast({ message: "Ticket download request processed.", show: true });
       setTimeout(() => setToast({ message: "", show: false }), 3000);
     }, 6000);
@@ -1983,6 +2006,7 @@ export default function App() {
         .then(() => {
           clearTimeout(safetyTimeout);
           setIsDownloading(false);
+          cleanupHtml2Pdf();
           setToast({ message: "Ticket PDF downloaded successfully!", show: true });
           setTimeout(() => setToast({ message: "", show: false }), 4000);
         })
@@ -1990,6 +2014,7 @@ export default function App() {
           clearTimeout(safetyTimeout);
           console.error("PDF generation failed:", err);
           setIsDownloading(false);
+          cleanupHtml2Pdf();
           setToast({ message: "PDF generation failed. Please try again.", show: true });
           setTimeout(() => setToast({ message: "", show: false }), 4000);
         });
@@ -1997,6 +2022,7 @@ export default function App() {
       clearTimeout(safetyTimeout);
       alert("Generating PDF ticket...");
       setIsDownloading(false);
+      cleanupHtml2Pdf();
     }
   };
 
@@ -2014,20 +2040,7 @@ export default function App() {
   // Clean up any scrolling lock or stray DOM elements left by html2pdf if/when download stops/fails
   useEffect(() => {
     if (!isDownloading) {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      
-      // Also restore the overlay's scrolling capability in case html2pdf touched it
-      const overlay = document.querySelector('.fixed.inset-0.z-50');
-      if (overlay) {
-        (overlay as HTMLElement).style.overflowY = 'auto';
-        (overlay as HTMLElement).style.overflow = 'auto';
-      }
-      
-      const strays = document.querySelectorAll('.html2pdf__container, .html2pdf__page');
-      strays.forEach(el => el.remove());
+      cleanupHtml2Pdf();
     }
   }, [isDownloading]);
 
@@ -4264,121 +4277,120 @@ export default function App() {
                     </div>
                   ) : (
                     // Payment Instructions View
-                    <>
-                      {/* Payment Method Details Card */}
-                      <div className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
-                        {paymentMethod === 'qris' ? (
-                          <div className="flex flex-col items-center text-center space-y-4">
-                            <div className="flex justify-between items-center w-full pb-3 border-b border-slate-100">
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Payment Method</span>
-                              <span className="text-xs font-extrabold text-[#0d2c56] bg-slate-100 px-2.5 py-1 rounded-lg">QRIS / e-Wallet</span>
-                            </div>
-                            <div className="w-44 h-44 bg-white p-3 rounded-xl shadow-md border border-slate-200/80 relative">
-                              <img 
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=REVENTSPAY-MOCK-QRIS-REvents-${selectedEvent.id}`} 
-                                alt="QRIS QR" 
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <p className="text-xs font-bold text-slate-800">Scan QRIS to Pay</p>
-                              <p className="text-[10px] text-slate-500 leading-relaxed px-4">
-                                Use GoPay, OVO, DANA, LinkAja, ShopeePay, or your preferred mobile banking app to scan the QR code above.
-                              </p>
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
+                      {paymentMethod === 'qris' ? (
+                        <div className="flex flex-col items-center text-center space-y-4">
+                          <div className="flex justify-between items-center w-full pb-3 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Payment Method</span>
+                            <span className="text-xs font-extrabold text-[#0d2c56] bg-slate-100 px-2.5 py-1 rounded-lg">QRIS / e-Wallet</span>
+                          </div>
+                          <div className="w-44 h-44 bg-white p-3 rounded-xl shadow-md border border-slate-200/80 relative">
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=REVENTSPAY-MOCK-QRIS-REvents-${selectedEvent.id}`} 
+                              alt="QRIS QR" 
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <p className="text-xs font-bold text-slate-800">Scan QRIS to Pay</p>
+                            <p className="text-[10px] text-slate-500 leading-relaxed px-4">
+                              Use GoPay, OVO, DANA, LinkAja, ShopeePay, or your preferred mobile banking app to scan the QR code above.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Receiving Bank</span>
+                            <span className="text-xs font-extrabold text-[#0d2c56] uppercase bg-slate-100 px-2.5 py-1 rounded-lg">{paymentMethod} Virtual Account</span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Virtual Account Number</span>
+                            <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 font-mono text-base font-bold text-slate-900">
+                              <span>98765{selectedEvent.id}{generatedVa}</span>
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`98765${selectedEvent.id}${generatedVa}`);
+                                  setToast({ message: "Virtual Account number copied to clipboard.", show: true });
+                                  setTimeout(() => setToast({ message: '', show: false }), 2000);
+                                }}
+                                className="text-xs font-bold text-[#00adef] hover:text-[#0092ca] bg-[#e0f4ff] px-2.5 py-1.5 rounded-lg transition-colors"
+                              >
+                                Copy
+                              </button>
                             </div>
                           </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Receiving Bank</span>
-                              <span className="text-xs font-extrabold text-[#0d2c56] uppercase bg-slate-100 px-2.5 py-1 rounded-lg">{paymentMethod} Virtual Account</span>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Virtual Account Number</span>
-                              <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 font-mono text-base font-bold text-slate-900">
-                                <span>98765{selectedEvent.id}{generatedVa}</span>
-                                <button 
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(`98765${selectedEvent.id}${generatedVa}`);
-                                    setToast({ message: "Virtual Account number copied to clipboard.", show: true });
-                                    setTimeout(() => setToast({ message: '', show: false }), 2000);
-                                  }}
-                                  className="text-xs font-bold text-[#00adef] hover:text-[#0092ca] bg-[#e0f4ff] px-2.5 py-1.5 rounded-lg transition-colors"
-                                >
-                                  Copy
-                                </button>
-                              </div>
-                            </div>
 
-                            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-[10px] text-slate-500 space-y-2">
-                              <p className="font-bold text-slate-700">ATM / Mobile Banking Payment Guide:</p>
-                              <p>1. Open your Mobile Banking app or go to an ATM.</p>
-                              <p>2. Select <strong className="text-slate-700">Transfer &gt; Virtual Account</strong> (or Transfer to Another Bank Account).</p>
-                              <p>3. Enter the VA number above as the destination account number.</p>
-                              <p>4. Enter the exact amount shown as the total.</p>
-                              <p>5. Click send and enter your PIN to complete the transaction.</p>
-                            </div>
+                          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-[10px] text-slate-500 space-y-2">
+                            <p className="font-bold text-slate-700">ATM / Mobile Banking Payment Guide:</p>
+                            <p>1. Open your Mobile Banking app or go to an ATM.</p>
+                            <p>2. Select <strong className="text-slate-700">Transfer &gt; Virtual Account</strong> (or Transfer to Another Bank Account).</p>
+                            <p>3. Enter the VA number above as the destination account number.</p>
+                            <p>4. Enter the exact amount shown as the total.</p>
+                            <p>5. Click send and enter your PIN to complete the transaction.</p>
                           </div>
-                        )}
-                      </div>
-
-                      {/* Action Simulator buttons */}
-                      <div className="space-y-3">
-                        <button
-                          disabled={isProcessingPayment}
-                          onClick={async () => {
-                            setIsProcessingPayment(true);
-                            setTimeout(async () => {
-                              try {
-                                const res = await apiFetch('/api/tickets/purchase', {
-                                  method: 'POST',
-                                  body: JSON.stringify({
-                                    eventId: selectedEvent.id,
-                                    paymentMethod: paymentMethod,
-                                    fullName: checkoutFullName,
-                                    email: checkoutEmail,
-                                    audienceCategory: checkoutAudience,
-                                    referralSource: checkoutReferral,
-                                    quantity: ticketQuantity
-                                  })
-                                });
-                                
-                                setPurchasedTicket(res.ticket);
-                                setPurchasedTickets(res.tickets || [res.ticket]);
-                                setSavedEventIds(prev => prev.filter(id => id !== selectedEvent.id));
-                                loadUserTickets();
-                                setToast({ message: `Payment successful! ${res.ticketCount || ticketQuantity} ticket(s) sent to email.`, show: true });
-                                setTimeout(() => setToast({ message: '', show: false }), 5000);
-                              } catch (err: any) {
-                                setToast({ message: err.message || "Failed to process payment", show: true });
-                                setTimeout(() => setToast({ message: '', show: false }), 4000);
-                              } finally {
-                                setIsProcessingPayment(false);
-                              }
-                            }, 1500);
-                          }}
-                          className={`w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
-                        >
-                          {isProcessingPayment && (
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          )}
-                          {isProcessingPayment ? 'Processing Payment...' : 'Pay Now'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowMidtransSnap(false);
-                            setCheckoutModal(null);
-                            setPaymentMethod('');
-                          }}
-                          className="w-full py-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold transition-all text-center"
-                        >
-                          Cancel Payment
-                        </button>
-                      </div>
-                    </>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
+
+                {/* Fixed Bottom Action Section when not purchased */}
+                {!purchasedTicket && (
+                  <div className="px-5 pb-5 pt-3 bg-white border-t border-slate-200 space-y-3">
+                    <button
+                      disabled={isProcessingPayment}
+                      onClick={async () => {
+                        setIsProcessingPayment(true);
+                        setTimeout(async () => {
+                          try {
+                            const res = await apiFetch('/api/tickets/purchase', {
+                              method: 'POST',
+                              body: JSON.stringify({
+                                eventId: selectedEvent.id,
+                                paymentMethod: paymentMethod,
+                                fullName: checkoutFullName,
+                                email: checkoutEmail,
+                                audienceCategory: checkoutAudience,
+                                referralSource: checkoutReferral,
+                                quantity: ticketQuantity
+                              })
+                            });
+                            
+                            setPurchasedTicket(res.ticket);
+                            setPurchasedTickets(res.tickets || [res.ticket]);
+                            setSavedEventIds(prev => prev.filter(id => id !== selectedEvent.id));
+                            loadUserTickets();
+                            setToast({ message: `Payment successful! ${res.ticketCount || ticketQuantity} ticket(s) sent to email.`, show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 5000);
+                          } catch (err: any) {
+                            setToast({ message: err.message || "Failed to process payment", show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 4000);
+                          } finally {
+                            setIsProcessingPayment(false);
+                          }
+                        }, 1500);
+                      }}
+                      className={`w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                      {isProcessingPayment && (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      )}
+                      {isProcessingPayment ? 'Processing Payment...' : 'Pay Now'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMidtransSnap(false);
+                        setCheckoutModal(null);
+                        setPaymentMethod('');
+                      }}
+                      className="w-full py-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold transition-all text-center cursor-pointer"
+                    >
+                      Cancel Payment
+                    </button>
+                  </div>
+                )}
 
                 {/* Footer brand info */}
                 <div className="bg-white px-5 py-3 text-center border-t border-slate-200 text-[9px] text-slate-400 font-semibold flex items-center justify-center gap-1.5">
@@ -4397,6 +4409,7 @@ export default function App() {
 
     const tickets = purchasedTickets.length ? purchasedTickets : (purchasedTicket ? [purchasedTicket] : []);
     const isFreeEvent = !selectedEvent.price || selectedEvent.price.toLowerCase() === 'free' || selectedEvent.price.replace(/[^0-9]/g, '') === '0';
+    const stableTime = React.useMemo(() => Date.now(), []);
 
     const handleDone = () => {
       setIsRegistrationComplete(false);
@@ -4432,8 +4445,8 @@ export default function App() {
         {/* DevFest Ticket Card Container */}
         <div id="ticket-download-container" className="space-y-6 bg-transparent p-1">
           {tickets.map((t: any, idx: number) => {
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}&t=${Date.now()}-${idx}`;
-            const eventImageUrl = selectedEvent.image ? (selectedEvent.image.includes('?') ? `${selectedEvent.image}&t=${Date.now()}` : `${selectedEvent.image}?t=${Date.now()}`) : '';
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}&t=${stableTime}-${idx}`;
+            const eventImageUrl = selectedEvent.image ? (selectedEvent.image.includes('?') ? `${selectedEvent.image}&t=${stableTime}` : `${selectedEvent.image}?t=${stableTime}`) : '';
             return (
               <div 
                 key={t.id} 

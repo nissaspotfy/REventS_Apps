@@ -11,6 +11,23 @@ function getChromiumPath(): string | undefined {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
   }
 
+  // Windows Chrome/Edge paths
+  if (process.platform === 'win32') {
+    const winPaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+      path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe')
+    ];
+    for (const p of winPaths) {
+      if (fs.existsSync(p)) {
+        console.log(`[Invoice] Found Windows Chrome/Edge path: ${p}`);
+        return p;
+      }
+    }
+  }
+
   // 1. Manual scan of PATH directories (zero shell/which dependencies)
   try {
     const pathEnv = process.env.PATH || '';
@@ -307,21 +324,31 @@ export class TicketController {
         </body>
         </html>
       `;
-
-      const options = { 
-        format: 'A4',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      // Generate PDF using Puppeteer directly
+      let pdfBuffer: Buffer;
+      const puppeteerModule = await import('puppeteer');
+      const puppeteer = puppeteerModule.default || puppeteerModule;
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
         executablePath: getChromiumPath()
-      };
-      const file = { content: htmlContent };
-      
-      // Set a 15-second timeout for PDF generation
-      const pdfPromise = html_to_pdf.generatePdf(file, options);
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Invoice PDF generation timed out')), 15000)
-      );
-      
-      const pdfBuffer = await Promise.race([pdfPromise, timeoutPromise]) as Buffer;
+      });
+      try {
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        
+        // Set 15-second timeout on pdf rendering
+        const renderPromise = page.pdf({
+          format: 'a4',
+          printBackground: true
+        });
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Invoice PDF generation timed out')), 15000)
+        );
+        pdfBuffer = await Promise.race([renderPromise, timeoutPromise]) as Buffer;
+      } finally {
+        await browser.close();
+      }
 
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename=Invoice_${transactionId}.pdf`);

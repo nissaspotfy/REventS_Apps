@@ -10,6 +10,23 @@ function getChromiumPath(): string | undefined {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
   }
 
+  // Windows Chrome/Edge paths
+  if (process.platform === 'win32') {
+    const winPaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+      path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe')
+    ];
+    for (const p of winPaths) {
+      if (fs.existsSync(p)) {
+        console.log(`[Events] Found Windows Chrome/Edge path: ${p}`);
+        return p;
+      }
+    }
+  }
+
   // 1. Manual scan of PATH directories (zero shell/which dependencies)
   try {
     const pathEnv = process.env.PATH || '';
@@ -373,23 +390,32 @@ REventS Team
             </html>
           `;
 
-          const options = { 
-            format: 'A4', 
-            landscape: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+          const puppeteerModule = await import('puppeteer');
+          const puppeteer = puppeteerModule.default || puppeteerModule;
+          const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
             executablePath: getChromiumPath()
-          };
-          const file = { content: htmlPdfContent };
-          
-          // Set a 15-second timeout for PDF generation to prevent hanging SMTP delivery
-          const pdfPromise = html_to_pdf.generatePdf(file, options);
-          const timeoutPromise = new Promise<null>((_, reject) => 
-            setTimeout(() => reject(new Error('PDF generation timed out')), 15000)
-          );
-          
-          pdfBuffer = await Promise.race([pdfPromise, timeoutPromise]) as Buffer;
+          });
+          try {
+            const page = await browser.newPage();
+            await page.setContent(htmlPdfContent, { waitUntil: 'networkidle0' });
+            
+            // Set 15-second timeout on pdf rendering
+            const renderPromise = page.pdf({
+              format: 'a4',
+              landscape: true,
+              printBackground: true
+            });
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('PDF generation timed out')), 15000)
+            );
+            pdfBuffer = await Promise.race([renderPromise, timeoutPromise]) as Buffer;
+          } finally {
+            await browser.close();
+          }
         } catch (pdfErr) {
-          console.error(`[Certificates] Failed to generate PDF for ticket ${ticket.id}:`, pdfErr);
+          console.error(`[Certificates] Failed to generate PDF for ticket ${ticket.id} via Puppeteer:`, pdfErr);
         }
 
         const sanitizedTitle = event.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30);
