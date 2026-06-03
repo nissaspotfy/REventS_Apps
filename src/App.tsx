@@ -1979,7 +1979,7 @@ export default function App() {
   const handleDownloadPDF = () => {
     if (isDownloading) return;
     setIsDownloading(true);
-    const element = document.getElementById('ticket-download-container');
+    const element = document.getElementById('ticket-print-element');
     if (!element) {
       setIsDownloading(false);
       return;
@@ -1994,11 +1994,11 @@ export default function App() {
     }, 6000);
 
     const opt = {
-      margin:       [0.2, 0.2, 0.2, 0.2],
+      margin:       [0.3, 0.3, 0.3, 0.3],
       filename:     `ticket-${selectedEvent?.title?.replace(/\s+/g, '-').toLowerCase() || 'ticket'}-${Date.now()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, allowTaint: false, logging: false },
-      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
     };
 
     if ((window as any).html2pdf) {
@@ -4391,11 +4391,6 @@ export default function App() {
                     </button>
                   </div>
                 )}
-
-                {/* Footer brand info */}
-                <div className="bg-white px-5 py-3 text-center border-t border-slate-200 text-[9px] text-slate-400 font-semibold flex items-center justify-center gap-1.5">
-                  Secure transaction processed by <span className="font-extrabold text-indigo-700">REventS Pay</span>
-                </div>
               </motion.div>
             </motion.div>
           )}
@@ -4440,6 +4435,106 @@ export default function App() {
           <p className="text-slate-300 text-sm max-w-md mx-auto">
             Your ticket(s) are ready. We have also sent a copy of your ticket(s) to <span className="font-semibold text-indigo-300">{checkoutEmail}</span>.
           </p>
+        </div>
+
+        {/* Hidden PDF Print Element optimized for html2pdf layout */}
+        <div id="ticket-print-element" style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '850px', fontFamily: 'Outfit, Arial, sans-serif' }}>
+          {tickets.map((t: any, idx: number) => {
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}&t=${stableTime}-${idx}`;
+            const eventImageUrl = selectedEvent.image ? (selectedEvent.image.includes('?') ? `${selectedEvent.image}&t=${stableTime}` : `${selectedEvent.image}?t=${stableTime}`) : '';
+            return (
+              <div 
+                key={`print-${t.id}`}
+                style={{ 
+                  backgroundColor: '#ffffff', 
+                  border: '1px solid #e2e8f0', 
+                  borderRadius: '24px', 
+                  overflow: 'hidden', 
+                  marginBottom: idx === tickets.length - 1 ? '0px' : '30px', 
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.08)', 
+                  width: '850px', 
+                  display: 'table', 
+                  borderCollapse: 'collapse', 
+                  pageBreakAfter: 'always', 
+                  breakAfter: 'page' 
+                }}
+              >
+                <div style={{ display: 'table-row' }}>
+                  {/* Left Cell: Cover Image */}
+                  <div style={{ display: 'table-cell', width: '200px', verticalAlign: 'middle', backgroundColor: '#0f172a', position: 'relative', overflow: 'hidden' }}>
+                    <img src={eventImageUrl} style={{ width: '200px', height: '260px', objectFit: 'cover', display: 'block' }} crossOrigin="anonymous" />
+                    <div style={{ position: 'absolute', top: '15px', left: '15px', backgroundColor: '#4f46e5', color: '#ffffff', fontWeight: 800, fontSize: '10px', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      {selectedEvent.category}
+                    </div>
+                  </div>
+                  
+                  {/* Middle Cell: Details */}
+                  <div style={{ display: 'table-cell', verticalAlign: 'top', padding: '25px 30px', borderRight: '2px dashed #e2e8f0', backgroundColor: '#ffffff' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ backgroundColor: '#e0e7ff', color: '#4338ca', fontWeight: 'bold', fontSize: '10px', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        REventS Pass
+                      </span>
+                      <span style={{ color: '#94a3b8', fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        PASS #{idx + 1} OF {tickets.length}
+                      </span>
+                    </div>
+                    
+                    <h3 style={{ margin: '0 0 15px 0', fontSize: '20px', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '-0.5px', lineHeight: 1.2 }}>
+                      {selectedEvent.title}
+                    </h3>
+                    
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+                      <tbody>
+                        <tr>
+                          <td style={{ paddingBottom: '12px', width: '50%' }}>
+                            <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TANGGAL & WAKTU</span>
+                            <span style={{ fontWeight: 800, color: '#334155', display: 'block', marginTop: '2px' }}>{selectedEvent.date}</span>
+                          </td>
+                          <td style={{ paddingBottom: '12px', width: '50%' }}>
+                            <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>PEMBELI / ATTENDEE</span>
+                            <span style={{ fontWeight: 800, color: '#334155', display: 'block', marginTop: '2px' }}>{t.fullName || 'Guest'}</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ paddingBottom: '12px' }}>
+                            <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>BERLAKU PADA</span>
+                            <span style={{ fontWeight: 800, color: '#10b981', display: 'block', marginTop: '2px' }}>Berlaku pada {selectedEvent.date.split(',').pop()?.trim() || selectedEvent.date}</span>
+                          </td>
+                          <td style={{ paddingBottom: '12px' }}>
+                            <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>CATEGORY</span>
+                            <span style={{ fontWeight: 800, color: '#334155', display: 'block', marginTop: '2px' }}>{t.audienceCategory || 'General Public'}</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>PRICE</span>
+                            <span style={{ fontWeight: 800, color: '#334155', display: 'block', marginTop: '2px' }}>{isFreeEvent ? 'Free' : (t.price || selectedEvent.price)}</span>
+                          </td>
+                          <td>
+                            <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TICKET ID</span>
+                            <span style={{ fontWeight: 800, color: '#4f46e5', display: 'block', marginTop: '2px', fontFamily: 'monospace' }}>{t.qrCode}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Right Cell: QR Code */}
+                  <div style={{ display: 'table-cell', width: '180px', verticalAlign: 'middle', padding: '25px', textAlign: 'center', backgroundColor: '#fafafa' }}>
+                    <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', padding: '8px', borderRadius: '12px', display: 'inline-block', boxShadow: '0 4px 10px rgba(0,0,0,0.04)', marginBottom: '10px' }}>
+                      <img src={qrUrl} style={{ width: '110px', height: '110px', display: 'block' }} crossOrigin="anonymous" />
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <span style={{ display: 'block', color: '#94a3b8', fontWeight: 'bold', fontSize: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>PASS CODE</span>
+                      <span style={{ display: 'inline-block', marginTop: '4px', padding: '3px 8px', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '9px', fontFamily: 'monospace', fontWeight: 'bold', color: '#475569' }}>
+                        {t.qrCode}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* DevFest Ticket Card Container */}
