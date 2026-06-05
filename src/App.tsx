@@ -358,6 +358,7 @@ export default function App() {
   const [payoutBank, setPayoutBank] = useState('');
   const [payoutAccountNo, setPayoutAccountNo] = useState('');
   const [payoutAccountName, setPayoutAccountName] = useState('');
+  const ticketStableTime = useMemo(() => Date.now(), []);
   const [newTeamMemberEmail, setNewTeamMemberEmail] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
   const [twitterUrl, setTwitterUrl] = useState('');
@@ -4404,7 +4405,7 @@ export default function App() {
 
     const tickets = purchasedTickets.length ? purchasedTickets : (purchasedTicket ? [purchasedTicket] : []);
     const isFreeEvent = !selectedEvent.price || selectedEvent.price.toLowerCase() === 'free' || selectedEvent.price.replace(/[^0-9]/g, '') === '0';
-    const stableTime = React.useMemo(() => Date.now(), []);
+    const stableTime = ticketStableTime;
 
     const handleDone = () => {
       setIsRegistrationComplete(false);
