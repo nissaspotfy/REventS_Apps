@@ -4439,7 +4439,7 @@ export default function App() {
         </div>
 
         {/* Hidden PDF Print Element optimized for html2pdf layout */}
-        <div id="ticket-print-element" style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '850px', fontFamily: 'Outfit, Arial, sans-serif' }}>
+        <div id="ticket-print-element" style={{ position: 'fixed', left: '0', top: '0', zIndex: -9999, opacity: 0, pointerEvents: 'none', width: '850px', fontFamily: 'Outfit, Arial, sans-serif' }}>
           {tickets.map((t: any, idx: number) => {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}&t=${stableTime}-${idx}`;
             const eventImageUrl = selectedEvent.image ? (selectedEvent.image.includes('?') ? `${selectedEvent.image}&t=${stableTime}` : `${selectedEvent.image}?t=${stableTime}`) : '';

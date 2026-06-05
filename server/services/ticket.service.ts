@@ -141,48 +141,169 @@ export class TicketService {
     // CSS Styles for PDF Ticket
     const pdfStylesMarkup = `
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;850;900&display=swap');
         body {
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          font-family: 'Outfit', 'Helvetica Neue', Helvetica, Arial, sans-serif;
           margin: 0; padding: 0; background-color: #fff; color: #333;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
         .ticket-wrapper {
           padding: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          box-sizing: border-box;
         }
         .ticket-container {
-          position: relative; width: 100%; max-width: 800px; margin: 0 auto;
-          border: 2px solid #ddd;
+          background-color: #ffffff; 
+          border: 1px solid #e2e8f0; 
+          border-radius: 24px; 
+          overflow: hidden; 
+          box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+          width: 800px; 
+          display: table; 
+          border-collapse: collapse; 
+        }
+        .img-cell {
+          display: table-cell; 
+          width: 200px; 
+          vertical-align: middle; 
+          background-color: #0f172a; 
+          position: relative; 
           overflow: hidden;
-          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150"><text x="10" y="70" font-family="Arial" font-size="24" fill="%23f1f5f9" transform="rotate(-45 75 75)" font-weight="bold">REventS</text></svg>');
         }
-        .banner {
-          width: 100%; height: 200px; object-fit: cover;
-          border-bottom: 4px solid #6366f1;
+        .img-cell img {
+          width: 200px; 
+          height: 260px; 
+          object-fit: cover; 
+          display: block;
         }
-        .content-wrapper {
-          display: flex; padding: 30px;
+        .category-badge {
+          position: absolute; 
+          top: 15px; 
+          left: 15px; 
+          background-color: #4f46e5; 
+          color: #ffffff; 
+          font-weight: 800; 
+          font-size: 10px; 
+          padding: 4px 10px; 
+          border-radius: 6px; 
+          text-transform: uppercase; 
+          letter-spacing: 1px;
         }
-        .left-col {
-          flex: 0 0 35%; padding-right: 20px; border-right: 2px dashed #ddd;
+        .details-cell {
+          display: table-cell; 
+          vertical-align: top; 
+          padding: 25px 30px; 
+          border-right: 2px dashed #e2e8f0; 
+          background-color: #ffffff;
         }
-        .right-col {
-          flex: 0 0 65%; padding-left: 30px;
+        .details-header {
+          margin-bottom: 12px;
         }
-        .ticket-header { color: #1e3a8a; margin: 0 0 10px 0; font-size: 16px; font-weight: bold; }
-        .qr-box img { width: 100%; max-width: 180px; height: auto; border: 4px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .event-title { font-size: 20px; font-weight: bold; color: #111827; margin: 20px 0 5px 0; }
-        .ticket-type { font-size: 18px; font-weight: bold; color: #6366f1; margin: 0 0 15px 0; }
-        .info-block { margin-bottom: 15px; }
-        .info-label { font-size: 12px; color: #6b7280; text-transform: uppercase; margin-bottom: 2px; }
-        .info-value { font-size: 14px; font-weight: bold; color: #1f2937; }
-        .blue-text { color: #2563eb; font-weight: bold; font-family: monospace; font-size: 16px; }
-        .footer-section {
-          border-top: 2px solid #ddd; padding: 20px 30px; background: rgba(255,255,255,0.8);
+        .pass-badge {
+          background-color: #e0e7ff; 
+          color: #4338ca; 
+          font-weight: bold; 
+          font-size: 10px; 
+          padding: 3px 8px; 
+          border-radius: 4px; 
+          text-transform: uppercase; 
+          letter-spacing: 1px; 
+          display: inline-block;
         }
-        .footer-title { font-size: 14px; font-weight: bold; color: #1e3a8a; margin-bottom: 10px; }
-        .footer-table { width: 100%; font-size: 12px; }
-        .footer-table td { padding: 4px 0; }
-        .label-cell { color: #6b7280; width: 30%; }
-        .value-cell { color: #111827; font-weight: bold; }
+        .pass-count {
+          color: #94a3b8; 
+          font-weight: bold; 
+          font-size: 10px; 
+          text-transform: uppercase; 
+          letter-spacing: 1px; 
+          float: right; 
+          display: inline-block;
+        }
+        .event-title {
+          margin: 0 0 15px 0; 
+          font-size: 20px; 
+          font-weight: 900; 
+          color: #0f172a; 
+          text-transform: uppercase; 
+          letter-spacing: -0.5px; 
+          line-height: 1.2;
+        }
+        .details-table {
+          width: 100%; 
+          border-collapse: collapse; 
+          font-size: 11px;
+        }
+        .details-table td {
+          padding-bottom: 12px; 
+          width: 50%; 
+          vertical-align: top;
+        }
+        .info-label {
+          display: block; 
+          color: #94a3b8; 
+          font-weight: bold; 
+          font-size: 9px; 
+          text-transform: uppercase; 
+          letter-spacing: 0.5px;
+        }
+        .info-value {
+          font-weight: 800; 
+          color: #334155; 
+          display: block; 
+          margin-top: 2px;
+        }
+        .info-value.valid {
+          color: #10b981;
+        }
+        .info-value.code {
+          color: #4f46e5;
+          font-family: monospace;
+        }
+        .qr-cell {
+          display: table-cell; 
+          width: 180px; 
+          vertical-align: middle; 
+          padding: 25px; 
+          text-align: center; 
+          background-color: #fafafa;
+        }
+        .qr-border {
+          background-color: #ffffff; 
+          border: 1px solid #e2e8f0; 
+          padding: 8px; 
+          border-radius: 12px; 
+          display: inline-block; 
+          box-shadow: 0 4px 10px rgba(0,0,0,0.04); 
+          margin-bottom: 10px;
+        }
+        .qr-border img {
+          width: 110px; 
+          height: 110px; 
+          display: block;
+        }
+        .passcode-label {
+          display: block; 
+          color: #94a3b8; 
+          font-weight: bold; 
+          font-size: 8px; 
+          text-transform: uppercase; 
+          letter-spacing: 1px;
+        }
+        .passcode-value {
+          display: inline-block; 
+          margin-top: 4px; 
+          padding: 3px 8px; 
+          background-color: #ffffff; 
+          border: 1px solid #e2e8f0; 
+          border-radius: 4px; 
+          font-size: 9px; 
+          font-family: monospace; 
+          font-weight: bold; 
+          color: #475569;
+        }
       </style>
     `;
 
@@ -356,89 +477,73 @@ REventS Team
         `;
 
         // 3. Construct ticket PDF HTML markup for this specific ticket
+        const isFreeEvent = event.price.toLowerCase() === 'free' || event.price.replace(/[^0-9]/g, '') === '0';
         const ticketMarkup = `
           <div class="ticket-wrapper">
             <div class="ticket-container">
-              <img src="${bannerUrl}" class="banner" />
-              <div class="content-wrapper">
-                <div class="left-col">
-                  <p class="ticket-header">Ticket ${idx + 1} of ${tickets.length}</p>
-                  <div class="qr-box">
+              <div style="display: table-row;">
+                <!-- Left Cell: Cover Image -->
+                <div class="img-cell">
+                  <img src="${bannerUrl}" />
+                  <div class="category-badge">${event.category}</div>
+                </div>
+                
+                <!-- Middle Cell: Details -->
+                <div class="details-cell">
+                  <div class="details-header">
+                    <span class="pass-badge">REventS Pass</span>
+                    <span class="pass-count">PASS ${idx + 1} OF ${tickets.length}</span>
+                    <div style="clear: both;"></div>
+                  </div>
+                  
+                  <h3 class="event-title">${event.title}</h3>
+                  
+                  <table class="details-table">
+                    <tbody>
+                      <tr>
+                        <td>
+                          <span class="info-label">TANGGAL & WAKTU</span>
+                          <span class="info-value">${event.date}</span>
+                        </td>
+                        <td>
+                          <span class="info-label">PEMBELI / ATTENDEE</span>
+                          <span class="info-value">${fullName || 'Guest'}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <span class="info-label">BERLAKU PADA</span>
+                          <span class="info-value valid">Berlaku pada ${event.date.split(',').pop()?.trim() || event.date}</span>
+                        </td>
+                        <td>
+                          <span class="info-label">CATEGORY</span>
+                          <span class="info-value">${audienceCategory || 'General Public'}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom: 0;">
+                          <span class="info-label">PRICE</span>
+                          <span class="info-value">${isFreeEvent ? 'Free' : event.price}</span>
+                        </td>
+                        <td style="padding-bottom: 0;">
+                          <span class="info-label">TICKET ID</span>
+                          <span class="info-value code">${tCode}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <!-- Right Cell: QR Code -->
+                <div class="qr-cell">
+                  <div class="qr-border">
                     <img src="${tQrCodeUrl}" />
                   </div>
-                  <div class="event-title">${event.title}</div>
-                  <div class="ticket-type">[${eventTypeLabel}] ${event.ticketType || 'Standard'}</div>
-                  
-                  <div class="info-block">
-                    <div class="info-label">Valid for / Berlaku pada</div>
-                    <div class="info-value">${event.date}</div>
-                  </div>
-                  <div class="info-block">
-                    <div class="info-label">Price / Harga</div>
-                    <div class="info-value">${event.price}</div>
+                  <div>
+                    <span class="passcode-label">PASS CODE</span>
+                    <span class="passcode-value">${tCode}</span>
                   </div>
                 </div>
-                
-                <div class="right-col">
-                  <p style="font-size: 12px; color: #4b5563; margin-top: 0;">Scan this QR Code on the venue or open the streaming link below to join the event.</p>
-                  
-                  <div class="info-block">
-                    <div class="info-label">Ticket No. / No. Tiket</div>
-                    <div class="info-value blue-text">${tCode}</div>
-                  </div>
-                  
-                  <div class="info-block">
-                    <div class="info-label">Name / Nama</div>
-                    <div class="info-value">${fullName || 'Guest'}</div>
-                  </div>
-                  
-                  <div class="info-block">
-                    <div class="info-label">Category / Kategori</div>
-                    <div class="info-value">${audienceCategory || 'General'}</div>
-                  </div>
-                  
-                  ${event.type === 'online' ? `
-                  <div class="info-block">
-                    <div class="info-label">Akses Tautan / Online Link</div>
-                    <div class="info-value"><a href="${event.onlineLink || '#'}" style="color: #2563eb; text-decoration: none; font-weight: bold;">${event.onlineLink || 'TBA'}</a></div>
-                  </div>
-                  ` : ''}
-                  
-                  <div class="info-block" style="margin-top: 30px;">
-                    <div class="info-label">Order No. / No. Pesanan</div>
-                    <div class="info-value" style="font-family: monospace;">ORD-${Math.floor(10000000 + Math.random() * 90000000)}</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="footer-section">
-                <div class="footer-title">Order Information / Informasi Pesanan</div>
-                <table class="footer-table">
-                  <tr>
-                    <td class="label-cell">Experience Name</td>
-                    <td class="value-cell">${event.title}</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">Ticket Type</td>
-                    <td class="value-cell">[${eventTypeLabel}] ${event.ticketType || 'Standard'}</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">Location</td>
-                    <td class="value-cell">${event.location}</td>
-                  </tr>
-                </table>
-                
-                <div class="footer-title" style="margin-top: 15px;">Buyer Contact / Kontak Pembeli</div>
-                <table class="footer-table">
-                  <tr>
-                    <td class="label-cell">Name</td>
-                    <td class="value-cell">${fullName || 'Guest'}</td>
-                  </tr>
-                  <tr>
-                    <td class="label-cell">Email</td>
-                    <td class="value-cell">${email || '-'}</td>
-                  </tr>
-                </table>
               </div>
             </div>
           </div>
@@ -469,11 +574,18 @@ REventS Team
           });
           try {
             const page = await browser.newPage();
-            await page.setContent(htmlPdfContent, { waitUntil: 'networkidle0' });
+            await page.setViewport({ width: 1122, height: 794 });
+            
+            try {
+              await page.setContent(htmlPdfContent, { waitUntil: 'load', timeout: 10000 });
+            } catch (loadErr) {
+              console.warn(`[Tickets] Puppeteer setContent load timeout for ticket ${tCode}, proceeding anyway:`, loadErr);
+            }
             
             // Set 15-second timeout on pdf rendering
             const renderPromise = page.pdf({
               format: 'a4',
+              landscape: true,
               printBackground: true
             });
             const timeoutPromise = new Promise<never>((_, reject) =>
