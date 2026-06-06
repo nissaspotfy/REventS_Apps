@@ -1998,7 +1998,20 @@ export default function App() {
       margin:       [0.3, 0.3, 0.3, 0.3],
       filename:     `ticket-${selectedEvent?.title?.replace(/\s+/g, '-').toLowerCase() || 'ticket'}-${Date.now()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, allowTaint: false, logging: false },
+      html2canvas:  { 
+        scale: 2, 
+        useCORS: true, 
+        allowTaint: false, 
+        logging: false,
+        onclone: (clonedDoc: any) => {
+          const el = clonedDoc.getElementById('ticket-print-element');
+          if (el) {
+            el.style.position = 'relative';
+            el.style.left = '0';
+            el.style.top = '0';
+          }
+        }
+      },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
     };
 
