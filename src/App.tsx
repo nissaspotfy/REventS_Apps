@@ -4167,6 +4167,7 @@ export default function App() {
       setCheckoutModal(null);
       setShowMidtransSnap(false);
       setPaymentMethod('');
+      setPendingRSVP(null);
       setHasAutoDownloaded(false);
       
       if (isAuthenticated) {
@@ -8001,17 +8002,6 @@ export default function App() {
                         <button 
                           onClick={() => {
                             setShowMidtransSnap(false);
-                            setCheckoutModal(null);
-                            setPaymentMethod('');
-                            setPendingRSVP(null);
-                            setPurchasedTickets([]);
-                            if (isAuthenticated) {
-                              setView('dashboard');
-                              setRole('audience');
-                              setAudienceTab('myTickets');
-                            } else {
-                              setView('landing');
-                            }
                           }}
                           className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm shadow-md shadow-indigo-200"
                         >

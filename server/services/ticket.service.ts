@@ -569,6 +569,7 @@ REventS Team
             format: 'A4',
             landscape: true,
             printBackground: true,
+            executablePath: getChromiumPath(),
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
           };
           const file = { content: htmlPdfContent };
