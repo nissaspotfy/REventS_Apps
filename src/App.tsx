@@ -2033,7 +2033,7 @@ export default function App() {
       setHasAutoDownloaded(true);
       const timer = setTimeout(() => {
         handleDownloadPDF();
-      }, 1500);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [purchasedTickets, purchasedTicket, isRegistrationComplete, hasAutoDownloaded, selectedEvent]);
@@ -4149,253 +4149,6 @@ export default function App() {
              </div>
           </motion.div>
         </div>
-
-        {/* Simulated Midtrans Snap Modal Overlay */}
-        <AnimatePresence>
-          {showMidtransSnap && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              className="fixed inset-0 bg-slate-950/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-            >
-              <motion.div 
-                initial={{ scale: 0.95, y: 15 }} 
-                animate={{ scale: 1, y: 0 }} 
-                exit={{ scale: 0.95, y: 15 }} 
-                className="bg-[#f4f6fa] text-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200"
-              >
-                {/* Header Snap */}
-                <div className="bg-white px-5 py-3.5 flex items-center justify-between border-b border-slate-200">
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => {
-                        setShowMidtransSnap(false);
-                      }}
-                      className="text-slate-400 hover:text-slate-600 transition-colors p-1"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    {/* REventS Payment Logo */}
-                     <div className="flex items-center gap-1.5">
-                       <div className="flex items-center gap-1">
-                         <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
-                         <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                       </div>
-                       <span className="font-sans font-extrabold text-base tracking-tight text-indigo-700 flex items-center">
-                         REventS<span className="text-purple-500 font-semibold ml-1 text-xs uppercase tracking-widest">Pay</span>
-                       </span>
-                     </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-full">
-                    <Shield className="w-3 h-3 text-emerald-500 fill-emerald-500/20" /> SECURE PAYMENT
-                  </span>
-                </div>
-
-                {/* Merchant & Order Details Panel */}
-                <div className="bg-white px-5 py-4 border-b border-slate-200 flex justify-between items-start gap-4">
-                  <div className="min-w-0">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant</h4>
-                    <p className="text-sm font-extrabold text-indigo-700 truncate">REventS</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5 truncate">{selectedEvent.title}</p>
-                    <p className="text-[9px] font-mono text-slate-400 mt-1">Order ID: REV-ORD-{selectedEvent.id}-{generatedVa}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total{ticketQuantity > 1 ? ` (${ticketQuantity}x)` : ''}</h4>
-                    <p className="text-base font-black text-indigo-800">
-                      {(() => {
-                        if (!selectedEvent.price || selectedEvent.price.toLowerCase() === 'free') return 'Free';
-                        const numStr = selectedEvent.price.replace(/[^0-9]/g, '');
-                        const unitPrice = parseInt(numStr, 10);
-                        if (isNaN(unitPrice)) return selectedEvent.price;
-                        const total = unitPrice * ticketQuantity;
-                        return `IDR ${total.toLocaleString('id-ID')}`;
-                      })()}
-                    </p>
-                    <div className="mt-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md inline-block">
-                      Session: {midtransTimer}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Main Content */}
-                <div className="p-5 flex-grow overflow-y-auto space-y-5">
-                  {purchasedTicket ? (
-                    // Success View
-                    <div className="bg-white rounded-2xl p-6 border border-slate-100 text-center space-y-5 shadow-sm">
-                      <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-400 animate-bounce">
-                        <Check className="w-9 h-9 stroke-[3.5]" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-black text-[#0d2c56]">Payment Successful!</h3>
-                        <p className="text-xs text-slate-500">Payment Successful</p>
-                      </div>
-                      
-                      <div className="bg-slate-50 p-4 rounded-xl text-left border border-slate-100 space-y-2.5">
-                        <p className="text-xs text-slate-600 leading-relaxed">
-                          <strong className="text-slate-900">{purchasedTickets.length || 1} ticket(s)</strong> for <strong className="text-slate-900">{selectedEvent.title}</strong> issued successfully. We have sent a PDF ticket with QR Code to your registered email:
-                        </p>
-                        <div className="bg-indigo-50 border border-indigo-200 px-3.5 py-2 rounded-lg font-mono text-xs font-bold text-indigo-700 break-all text-center">
-                          {checkoutEmail}
-                        </div>
-                        {purchasedTickets.length > 1 && (
-                          <div className="space-y-1 max-h-32 overflow-y-auto">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ticket Codes:</p>
-                            {purchasedTickets.map((t: any, i: number) => (
-                              <div key={t.id} className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-indigo-500 w-5">#{i+1}</span>
-                                <span className="font-mono text-[10px] text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-200">{t.qrCode}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <p className="text-[10px] text-slate-400 text-center font-medium italic">
-                          (Please check your inbox or spam folder)
-                        </p>
-                      </div>
-                      
-                      <div className="pt-2">
-                        <button 
-                          onClick={() => {
-                            setShowMidtransSnap(false);
-                            setCheckoutModal(null);
-                            setPaymentMethod('');
-                            setPendingRSVP(null);
-                            setPurchasedTickets([]);
-                            if (isAuthenticated) {
-                              setView('dashboard');
-                              setRole('audience');
-                              setAudienceTab('myTickets');
-                            } else {
-                              setView('landing');
-                            }
-                          }}
-                          className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm shadow-md shadow-indigo-200"
-                        >
-                          Done
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    // Payment Instructions View
-                    <div className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
-                      {paymentMethod === 'qris' ? (
-                        <div className="flex flex-col items-center text-center space-y-4">
-                          <div className="flex justify-between items-center w-full pb-3 border-b border-slate-100">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Payment Method</span>
-                            <span className="text-xs font-extrabold text-[#0d2c56] bg-slate-100 px-2.5 py-1 rounded-lg">QRIS / e-Wallet</span>
-                          </div>
-                          <div className="w-44 h-44 bg-white p-3 rounded-xl shadow-md border border-slate-200/80 relative">
-                            <img 
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=REVENTSPAY-MOCK-QRIS-REvents-${selectedEvent.id}`} 
-                              alt="QRIS QR" 
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <p className="text-xs font-bold text-slate-800">Scan QRIS to Pay</p>
-                            <p className="text-[10px] text-slate-500 leading-relaxed px-4">
-                              Use GoPay, OVO, DANA, LinkAja, ShopeePay, or your preferred mobile banking app to scan the QR code above.
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Receiving Bank</span>
-                            <span className="text-xs font-extrabold text-[#0d2c56] uppercase bg-slate-100 px-2.5 py-1 rounded-lg">{paymentMethod} Virtual Account</span>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Virtual Account Number</span>
-                            <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 font-mono text-base font-bold text-slate-900">
-                              <span>98765{selectedEvent.id}{generatedVa}</span>
-                              <button 
-                                onClick={() => {
-                                  navigator.clipboard.writeText(`98765${selectedEvent.id}${generatedVa}`);
-                                  setToast({ message: "Virtual Account number copied to clipboard.", show: true });
-                                  setTimeout(() => setToast({ message: '', show: false }), 2000);
-                                }}
-                                className="text-xs font-bold text-[#00adef] hover:text-[#0092ca] bg-[#e0f4ff] px-2.5 py-1.5 rounded-lg transition-colors"
-                              >
-                                Copy
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-[10px] text-slate-500 space-y-2">
-                            <p className="font-bold text-slate-700">ATM / Mobile Banking Payment Guide:</p>
-                            <p>1. Open your Mobile Banking app or go to an ATM.</p>
-                            <p>2. Select <strong className="text-slate-700">Transfer &gt; Virtual Account</strong> (or Transfer to Another Bank Account).</p>
-                            <p>3. Enter the VA number above as the destination account number.</p>
-                            <p>4. Enter the exact amount shown as the total.</p>
-                            <p>5. Click send and enter your PIN to complete the transaction.</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Fixed Bottom Action Section when not purchased */}
-                {!purchasedTicket && (
-                  <div className="px-5 pb-5 pt-3 bg-white border-t border-slate-200 space-y-3">
-                    <button
-                      disabled={isProcessingPayment}
-                      onClick={async () => {
-                        setIsProcessingPayment(true);
-                        setTimeout(async () => {
-                          try {
-                            const res = await apiFetch('/api/tickets/purchase', {
-                              method: 'POST',
-                              body: JSON.stringify({
-                                eventId: selectedEvent.id,
-                                paymentMethod: paymentMethod,
-                                fullName: checkoutFullName,
-                                email: checkoutEmail,
-                                audienceCategory: checkoutAudience,
-                                referralSource: checkoutReferral,
-                                quantity: ticketQuantity
-                              })
-                            });
-                            
-                            setPurchasedTicket(res.ticket);
-                            setPurchasedTickets(res.tickets || [res.ticket]);
-                            setSavedEventIds(prev => prev.filter(id => id !== selectedEvent.id));
-                            loadUserTickets();
-                            setToast({ message: `Payment successful! ${res.ticketCount || ticketQuantity} ticket(s) sent to email.`, show: true });
-                            setTimeout(() => setToast({ message: '', show: false }), 5000);
-                          } catch (err: any) {
-                            setToast({ message: err.message || "Failed to process payment", show: true });
-                            setTimeout(() => setToast({ message: '', show: false }), 4000);
-                          } finally {
-                            setIsProcessingPayment(false);
-                          }
-                        }, 1500);
-                      }}
-                      className={`w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    >
-                      {isProcessingPayment && (
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      )}
-                      {isProcessingPayment ? 'Processing Payment...' : 'Pay Now'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowMidtransSnap(false);
-                        setCheckoutModal(null);
-                        setPaymentMethod('');
-                      }}
-                      className="w-full py-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold transition-all text-center cursor-pointer"
-                    >
-                      Cancel Payment
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     );
   };
@@ -4439,7 +4192,7 @@ export default function App() {
         </div>
 
         {/* Hidden PDF Print Element optimized for html2pdf layout */}
-        <div id="ticket-print-element" style={{ position: 'fixed', left: '0', top: '0', zIndex: -9999, opacity: 0, pointerEvents: 'none', width: '850px', fontFamily: 'Outfit, Arial, sans-serif' }}>
+        <div id="ticket-print-element" style={{ position: 'fixed', left: '-9999px', top: '0', width: '850px', fontFamily: 'Outfit, Arial, sans-serif' }}>
           {tickets.map((t: any, idx: number) => {
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${t.qrCode}&t=${stableTime}-${idx}`;
             const eventImageUrl = selectedEvent.image ? (selectedEvent.image.includes('?') ? `${selectedEvent.image}&t=${stableTime}` : `${selectedEvent.image}?t=${stableTime}`) : '';
@@ -8136,6 +7889,253 @@ export default function App() {
                    </>
                  )}
                </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Simulated Midtrans Snap Modal Overlay */}
+        <AnimatePresence>
+          {showMidtransSnap && selectedEvent && (
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"
+            >
+              <motion.div 
+                initial={{ scale: 0.95, y: 15 }} 
+                animate={{ scale: 1, y: 0 }} 
+                exit={{ scale: 0.95, y: 15 }} 
+                className="bg-[#f4f6fa] text-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200"
+              >
+                {/* Header Snap */}
+                <div className="bg-white px-5 py-3.5 flex items-center justify-between border-b border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => {
+                        setShowMidtransSnap(false);
+                      }}
+                      className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    {/* REventS Payment Logo */}
+                     <div className="flex items-center gap-1.5">
+                       <div className="flex items-center gap-1">
+                         <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
+                         <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                       </div>
+                       <span className="font-sans font-extrabold text-base tracking-tight text-indigo-700 flex items-center">
+                         REventS<span className="text-purple-500 font-semibold ml-1 text-xs uppercase tracking-widest">Pay</span>
+                       </span>
+                     </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-full">
+                    <Shield className="w-3 h-3 text-emerald-500 fill-emerald-500/20" /> SECURE PAYMENT
+                  </span>
+                </div>
+
+                {/* Merchant & Order Details Panel */}
+                <div className="bg-white px-5 py-4 border-b border-slate-200 flex justify-between items-start gap-4">
+                  <div className="min-w-0">
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Merchant</h4>
+                    <p className="text-sm font-extrabold text-indigo-700 truncate">REventS</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5 truncate">{selectedEvent.title}</p>
+                    <p className="text-[9px] font-mono text-slate-400 mt-1">Order ID: REV-ORD-{selectedEvent.id}-{generatedVa}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total{ticketQuantity > 1 ? ` (${ticketQuantity}x)` : ''}</h4>
+                    <p className="text-base font-black text-indigo-800">
+                      {(() => {
+                        if (!selectedEvent.price || selectedEvent.price.toLowerCase() === 'free') return 'Free';
+                        const numStr = selectedEvent.price.replace(/[^0-9]/g, '');
+                        const unitPrice = parseInt(numStr, 10);
+                        if (isNaN(unitPrice)) return selectedEvent.price;
+                        const total = unitPrice * ticketQuantity;
+                        return `IDR ${total.toLocaleString('id-ID')}`;
+                      })()}
+                    </p>
+                    <div className="mt-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md inline-block">
+                      Session: {midtransTimer}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Content */}
+                <div className="p-5 flex-grow overflow-y-auto space-y-5">
+                  {purchasedTicket ? (
+                    // Success View
+                    <div className="bg-white rounded-2xl p-6 border border-slate-100 text-center space-y-5 shadow-sm">
+                      <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-400 animate-bounce">
+                        <Check className="w-9 h-9 stroke-[3.5]" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-black text-[#0d2c56]">Payment Successful!</h3>
+                        <p className="text-xs text-slate-500">Payment Successful</p>
+                      </div>
+                      
+                      <div className="bg-slate-50 p-4 rounded-xl text-left border border-slate-100 space-y-2.5">
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          <strong className="text-slate-900">{purchasedTickets.length || 1} ticket(s)</strong> for <strong className="text-slate-900">{selectedEvent.title}</strong> issued successfully. We have sent a PDF ticket with QR Code to your registered email:
+                        </p>
+                        <div className="bg-indigo-50 border border-indigo-200 px-3.5 py-2 rounded-lg font-mono text-xs font-bold text-indigo-700 break-all text-center">
+                          {checkoutEmail}
+                        </div>
+                        {purchasedTickets.length > 1 && (
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ticket Codes:</p>
+                            {purchasedTickets.map((t: any, i: number) => (
+                              <div key={t.id} className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-indigo-500 w-5">#{i+1}</span>
+                                <span className="font-mono text-[10px] text-slate-600 bg-white px-1.5 py-0.5 rounded border border-slate-200">{t.qrCode}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-[10px] text-slate-400 text-center font-medium italic">
+                          (Please check your inbox or spam folder)
+                        </p>
+                      </div>
+                      
+                      <div className="pt-2">
+                        <button 
+                          onClick={() => {
+                            setShowMidtransSnap(false);
+                            setCheckoutModal(null);
+                            setPaymentMethod('');
+                            setPendingRSVP(null);
+                            setPurchasedTickets([]);
+                            if (isAuthenticated) {
+                              setView('dashboard');
+                              setRole('audience');
+                              setAudienceTab('myTickets');
+                            } else {
+                              setView('landing');
+                            }
+                          }}
+                          className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm shadow-md shadow-indigo-200"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Payment Instructions View
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm space-y-4">
+                      {paymentMethod === 'qris' ? (
+                        <div className="flex flex-col items-center text-center space-y-4">
+                          <div className="flex justify-between items-center w-full pb-3 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Payment Method</span>
+                            <span className="text-xs font-extrabold text-[#0d2c56] bg-slate-100 px-2.5 py-1 rounded-lg">QRIS / e-Wallet</span>
+                          </div>
+                          <div className="w-44 h-44 bg-white p-3 rounded-xl shadow-md border border-slate-200/80 relative">
+                            <img 
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=REVENTSPAY-MOCK-QRIS-REvents-${selectedEvent.id}`} 
+                              alt="QRIS QR" 
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <p className="text-xs font-bold text-slate-800">Scan QRIS to Pay</p>
+                            <p className="text-[10px] text-slate-500 leading-relaxed px-4">
+                              Use GoPay, OVO, DANA, LinkAja, ShopeePay, or your preferred mobile banking app to scan the QR code above.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Receiving Bank</span>
+                            <span className="text-xs font-extrabold text-[#0d2c56] uppercase bg-slate-100 px-2.5 py-1 rounded-lg">{paymentMethod} Virtual Account</span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Virtual Account Number</span>
+                            <div className="flex items-center justify-between bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 font-mono text-base font-bold text-slate-900">
+                              <span>98765{selectedEvent.id}{generatedVa}</span>
+                              <button 
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`98765${selectedEvent.id}${generatedVa}`);
+                                  setToast({ message: "Virtual Account number copied to clipboard.", show: true });
+                                  setTimeout(() => setToast({ message: '', show: false }), 2000);
+                                }}
+                                className="text-xs font-bold text-[#00adef] hover:text-[#0092ca] bg-[#e0f4ff] px-2.5 py-1.5 rounded-lg transition-colors"
+                              >
+                                Copy
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-[10px] text-slate-500 space-y-2">
+                            <p className="font-bold text-slate-700">ATM / Mobile Banking Payment Guide:</p>
+                            <p>1. Open your Mobile Banking app or go to an ATM.</p>
+                            <p>2. Select <strong className="text-slate-700">Transfer &gt; Virtual Account</strong> (or Transfer to Another Bank Account).</p>
+                            <p>3. Enter the VA number above as the destination account number.</p>
+                            <p>4. Enter the exact amount shown as the total.</p>
+                            <p>5. Click send and enter your PIN to complete the transaction.</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Fixed Bottom Action Section when not purchased */}
+                {!purchasedTicket && (
+                  <div className="px-5 pb-5 pt-3 bg-white border-t border-slate-200 space-y-3">
+                    <button
+                      disabled={isProcessingPayment}
+                      onClick={async () => {
+                        setIsProcessingPayment(true);
+                        setTimeout(async () => {
+                          try {
+                            const res = await apiFetch('/api/tickets/purchase', {
+                              method: 'POST',
+                              body: JSON.stringify({
+                                eventId: selectedEvent.id,
+                                paymentMethod: paymentMethod,
+                                fullName: checkoutFullName,
+                                email: checkoutEmail,
+                                audienceCategory: checkoutAudience,
+                                referralSource: checkoutReferral,
+                                quantity: ticketQuantity
+                              })
+                            });
+                            
+                            setPurchasedTicket(res.ticket);
+                            setPurchasedTickets(res.tickets || [res.ticket]);
+                            setSavedEventIds(prev => prev.filter(id => id !== selectedEvent.id));
+                            loadUserTickets();
+                            setToast({ message: `Payment successful! ${res.ticketCount || ticketQuantity} ticket(s) sent to email.`, show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 5000);
+                          } catch (err: any) {
+                            setToast({ message: err.message || "Failed to process payment", show: true });
+                            setTimeout(() => setToast({ message: '', show: false }), 4000);
+                          } finally {
+                            setIsProcessingPayment(false);
+                          }
+                        }, 1500);
+                      }}
+                      className={`w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 ${isProcessingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                      {isProcessingPayment && (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      )}
+                      {isProcessingPayment ? 'Processing Payment...' : 'Pay Now'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMidtransSnap(false);
+                        setCheckoutModal(null);
+                        setPaymentMethod('');
+                      }}
+                      className="w-full py-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold transition-all text-center cursor-pointer"
+                    >
+                      Cancel Payment
+                    </button>
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

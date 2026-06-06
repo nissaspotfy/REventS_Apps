@@ -562,41 +562,21 @@ REventS Team
           </html>
         `;
 
-        // Generate PDF Buffer for this specific ticket using Puppeteer directly
+        // Generate PDF Buffer using html-pdf-node
         let pdfBuffer: Buffer | null = null;
         try {
-          const puppeteerModule = await import('puppeteer');
-          const puppeteer = puppeteerModule.default || puppeteerModule;
-          const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-            executablePath: getChromiumPath()
-          });
-          try {
-            const page = await browser.newPage();
-            await page.setViewport({ width: 1122, height: 794 });
-            
-            try {
-              await page.setContent(htmlPdfContent, { waitUntil: 'load', timeout: 10000 });
-            } catch (loadErr) {
-              console.warn(`[Tickets] Puppeteer setContent load timeout for ticket ${tCode}, proceeding anyway:`, loadErr);
-            }
-            
-            // Set 15-second timeout on pdf rendering
-            const renderPromise = page.pdf({
-              format: 'a4',
-              landscape: true,
-              printBackground: true
-            });
-            const timeoutPromise = new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error('PDF generation timed out')), 15000)
-            );
-            pdfBuffer = await Promise.race([renderPromise, timeoutPromise]) as Buffer;
-          } finally {
-            await browser.close();
-          }
+          const options = {
+            format: 'A4',
+            landscape: true,
+            printBackground: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+          };
+          const file = { content: htmlPdfContent };
+          
+          pdfBuffer = await html_to_pdf.generatePdf(file, options);
+          console.log(`[Tickets] PDF generated successfully for ticket ${tCode} via html-pdf-node. Size: ${pdfBuffer.length}`);
         } catch (pdfErr) {
-          console.error(`Failed to generate PDF for ticket ${tCode} via Puppeteer:`, pdfErr);
+          console.error(`Failed to generate PDF for ticket ${tCode} via html-pdf-node:`, pdfErr);
         }
 
         const sanitizedTitle = event.title.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30);
