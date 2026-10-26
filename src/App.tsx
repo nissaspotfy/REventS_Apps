@@ -2040,16 +2040,8 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    const hasTickets = purchasedTickets.length > 0 || purchasedTicket !== null;
-    if (hasTickets && (purchasedTicket || isRegistrationComplete) && !hasAutoDownloaded) {
-      setHasAutoDownloaded(true);
-      const timer = setTimeout(() => {
-        handleDownloadPDF();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [purchasedTickets, purchasedTicket, isRegistrationComplete, hasAutoDownloaded, selectedEvent]);
+  // Auto-download removed as requested - user navigates directly or views on screen
+
 
   // Clean up any scrolling lock or stray DOM elements left by html2pdf if/when download stops/fails
   useEffect(() => {
@@ -4454,18 +4446,11 @@ export default function App() {
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 max-w-md mx-auto text-center">
-          <button
-            onClick={handleDownloadPDF}
-            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white font-extrabold rounded-2xl transition-all text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Ticket className="w-5 h-5" />
-            {isDownloading ? 'Downloading...' : 'Download Ticket'}
-          </button>
+        {/* Action Button */}
+        <div className="flex items-center justify-center pt-4 max-w-sm mx-auto text-center">
           <button
             onClick={handleDone}
-            className="w-full py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-extrabold rounded-2xl transition-all text-sm shadow-md flex items-center justify-center cursor-pointer"
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white font-extrabold rounded-2xl transition-all text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer"
           >
             {isAuthenticated ? 'Go to Dashboard' : 'Ke Beranda'}
           </button>
